@@ -1,0 +1,4 @@
+.env
+dist
+gcp.json
+node_modules

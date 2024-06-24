@@ -1,0 +1,27 @@
+[
+    {
+        "open": 120.0,
+        "close": 121.8,
+        "closeTime": 0
+    },
+    {
+        "open": 116.667,
+        "close": 120.0,
+        "closeTime": 0
+    },
+    {
+        "open": 115.55,
+        "close": 116.667,
+        "closeTime": 0
+    },
+    {
+        "open": 116.0,
+        "close": 115.55,
+        "closeTime": 0
+    },
+    {
+        "open": 115.55,
+        "close": 116.0,
+        "closeTime": 0
+    }
+]
