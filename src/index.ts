@@ -1,16 +1,18 @@
-import { Request, Response, Express, response } from 'express';
 import express from 'express';
+import { Request, Response, Express, response } from 'express';
 import { initConfig, loadEnv, RuntimeConfig } from './config';
 import { Ticker } from './ticker';
 import { BinanceClient } from './market';
-import { Rule, MarketClient, MarketClients } from './types';
-import { makeClient } from './datastore';
-import { fetchAllActive } from './rules';
+import { MarketClients } from './types';
+import { RuleContainer, containerFactory } from './rules';
 import { OrderManager } from './order-manager';
+import { EventBus } from './eventbus';
 
 async function main() {
     const cfg = initConfig(process.argv.slice(2));
     const env = loadEnv();
+    const eventBus: EventBus = new EventBus();
+
     // dd(cfg, env);
     // const datastore = makeClient(cfg);
 
@@ -23,8 +25,16 @@ async function main() {
         binance: new BinanceClient(env.BINANCE_API_KEY, env.BINANCE_SECRET_KEY),
     };
 
-    const ticker = new Ticker([], env.TICK_TIMEOUT, clients, orderManager);
-    ticker.start();
+    try {
+        //const datastore: Datastore = datastoreFactory(env.GCP_PROJECT_ID, env.GCP_KEYFILE, env.GCP_NAMESPACE);
+        const ruleContainer: RuleContainer = containerFactory(eventBus, env.ACTIVATION_TIMEOUT);
+        await ruleContainer.load();
+        const ticker = new Ticker(ruleContainer, clients, orderManager, env.TICK_TIMEOUT);
+        ticker.start();
+    } catch (e) {
+        console.error(e);
+        process.exit(1);
+    }
 
     process.on('SIGINT', onShutdown);
     initServer(cfg);
@@ -49,15 +59,11 @@ function initServer(cfg: RuntimeConfig) {
 function onShutdown() {
     console.log('\n*** Shutdown signal received ****');
 
+
     setTimeout(() => {
         console.log('*** App is finished ***');
         process.exit(0);
     }, 500);
-}
-
-function dd(...args: any[]) {
-    console.log(...args);
-    process.exit(0);
 }
 
 main();

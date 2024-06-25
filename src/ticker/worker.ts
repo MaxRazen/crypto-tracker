@@ -34,13 +34,9 @@ export class TickerWorker {
             promiseJobs.push(() => this.handleSeriesRules(seriesRules))
         }
 
-        await Promise.all(promiseJobs.map((job: PromiseJob) => job()));
-        
-        // (optional) aggregate rules to reduce number of queries
-        // query market: pair, timeframe?, limit?
-        // walk through activators
-        // apply actions if an activator passed (call Order Manager)
-        // deactivate rule for a while
+        if (promiseJobs.length > 0) {
+            await Promise.all(promiseJobs.map((job: PromiseJob) => job()));
+        }
     }
 
     private async handleScalarRules(rules: Rule[]): Promise<void> {
@@ -137,6 +133,9 @@ export class TickerWorker {
                 deadlines: rule.deadlines,
             };
             this.orderManager.createOrder(orderCreateData);
-        })
+        });
+
+        // TODO: think how to call RuleContainer indirectly
+        // await this.ruleContainer.markAsCompleted(rule);
     }
 }

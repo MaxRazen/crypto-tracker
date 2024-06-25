@@ -1,4 +1,5 @@
 .env
+.data.env.example
 dist
 gcp.json
 node_modules

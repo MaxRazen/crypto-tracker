@@ -5,8 +5,10 @@ export type RuntimeConfig = {
 }
 export type EnvVariables = {
     TICK_TIMEOUT: number
+    ACTIVATION_TIMEOUT: number
     GCP_KEYFILE: string
     GCP_PROJECT_ID: string
+    GCP_NAMESPACE: string
     BINANCE_API_KEY: string
     BINANCE_SECRET_KEY: string
     ORDER_MANAGER_ENDPOINT: string
@@ -52,8 +54,10 @@ export function loadEnv(): EnvVariables {
 
     return {
         TICK_TIMEOUT: +(parsedEnv.TICK_TIMEOUT || '60'),
+        ACTIVATION_TIMEOUT: +(parsedEnv.ACTIVATION_TIMEOUT || '1800'),
         GCP_KEYFILE: parsedEnv.GCP_KEYFILE || 'gcp.json',
         GCP_PROJECT_ID: parsedEnv.GCP_PROJECT_ID || '',
+        GCP_NAMESPACE: parsedEnv.GCP_NAMESPACE || 'crypto-tracker',
         BINANCE_API_KEY: parsedEnv.BINANCE_API_KEY || '',
         BINANCE_SECRET_KEY: parsedEnv.BINANCE_SECRET_KEY || '',
         ORDER_MANAGER_ENDPOINT: parsedEnv.ORDER_MANAGER_ENDPOINT || 'localhost:50051',

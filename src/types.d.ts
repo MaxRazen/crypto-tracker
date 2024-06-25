@@ -38,6 +38,8 @@ export type Deadline = {
     action: DeadlineAction
 }
 
+export type Timestamp = number;
+
 export type Rule = {
     uid: string
     active: boolean
@@ -46,6 +48,7 @@ export type Rule = {
     timeframe: TimeframeType
     seriesLimit?: number
     fetchType: FetchType
+    lastCompletedAt: Timestamp
     activators: Activator[]
     actions: Action[]
     deadlines: Deadline[]
@@ -98,6 +101,6 @@ export type OrderCreationData = {
     action: ActionType
     behavior: ActionBehavior
     price: string
-    quantity: Quantity
+    quantity: OrderQuantity
     deadlines: Deadline[]
 }

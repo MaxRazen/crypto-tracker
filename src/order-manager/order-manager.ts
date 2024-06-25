@@ -1,3 +1,4 @@
+import { OrderCreationData } from '../types';
 import { sleep } from '../utils';
 
 export interface IOrderManager {
@@ -11,8 +12,9 @@ export class OrderManager implements IOrderManager {
         this.endpoint = endpoint;
     }
 
-    public async createOrder(orderCreateData: any): Promise<void> {
+    public async createOrder(orderCreateData: OrderCreationData): Promise<void> {
         // TODO: add a call to OrderManager service
+        console.log('OrderManager::createOrder', orderCreateData);
         await sleep(1000);
     }
 }
