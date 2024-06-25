@@ -49,7 +49,7 @@ export class RuleDatastore implements RuleStorage {
     }
 
     private serialize(rules: Rule[]): string {
-        return JSON.stringify(rules);
+        return JSON.stringify(rules, null, 4);
     }
 
     private desirialize(data: string): Rule[] {

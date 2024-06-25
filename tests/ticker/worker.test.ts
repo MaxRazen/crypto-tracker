@@ -3,8 +3,9 @@ import { describe, it } from 'mocha';
 import { cloneDeep } from 'lodash-es';
 import { TickerWorker } from '../../src/ticker/worker';
 import { IOrderManager } from '../../src/order-manager';
-import { Candle, MarketClient, MarketClients, OrderCreationData, PairPrice, Rule, TimeframeType } from '../../src/types';
+import { Candle, MarketClient, MarketClients, OrderCreationData, PairPrice, Rule, TimeframeType, Timestamp } from '../../src/types';
 import jsonCandles from '../stub/candles.grow.json';
+import { RuleContainer, RuleStorage } from '../../src/rules';
 
 class OrderManagerStub implements IOrderManager {
     constructor(private assertCallback: (data: any) => void) {
@@ -47,6 +48,18 @@ class DummyMarketClient implements MarketClient {
     }
 }
 
+class RuleStorageStub implements RuleStorage {
+    constructor(private rules: Rule[]) {
+    }
+    async fetchAllActive(): Promise<Rule[]> {
+        return this.rules;
+    }
+    async updateOrCreate(rule: Rule): Promise<void> {
+    }
+    async updateLastCompletedAt(rule: Rule, ts: Timestamp): Promise<void> {
+    }
+}
+
 const rule: Rule = {
     uid: '1001',
     active: true,
@@ -54,6 +67,7 @@ const rule: Rule = {
     pair: 'BTC-USDT',
     timeframe: '15m',
     fetchType: 'scalar',
+    lastCompletedAt: 0,
     activators: [{
         type: 'price',
         side: 'gte',
@@ -90,7 +104,10 @@ describe('ticker/worker module', () => {
             })
         }
 
-        const worker = new TickerWorker([rule], clients, orderManager);
+        const ruleStorage: RuleStorageStub = new RuleStorageStub([rule]);
+        const ruleContainer: RuleContainer = new RuleContainer(ruleStorage, 300);
+
+        const worker = new TickerWorker([rule], clients, orderManager, ruleContainer);
 
         await worker.handle();
     })
@@ -116,6 +133,9 @@ describe('ticker/worker module', () => {
             [rule.market]: client,
         }
 
+        const ruleStorage: RuleStorageStub = new RuleStorageStub([rule]);
+        const ruleContainer: RuleContainer = new RuleContainer(ruleStorage, 300);
+
         const customRule: Rule = cloneDeep(rule);
         customRule.fetchType = 'series';
         customRule.actions[0].type = 'sell';
@@ -126,7 +146,7 @@ describe('ticker/worker module', () => {
             value: '3',
         }];
 
-        const worker = new TickerWorker([customRule], clients, orderManager);
+        const worker = new TickerWorker([customRule], clients, orderManager, ruleContainer);
 
         worker.handle();
     })

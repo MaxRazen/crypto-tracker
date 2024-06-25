@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash-es';
 import { OrderManager } from '../order-manager';
 import { RuleContainer } from '../rules';
 import { MarketClients, Rule } from '../types';
@@ -86,10 +87,12 @@ export class Ticker {
     }
 
     private async handleTick(resolve: resolver, reject: rejector): Promise<void> {
+        const rules = cloneDeep(this.ruleContainer.getAvailable());
         const worker = new TickerWorker(
-            this.ruleContainer.getAvailable(),
+            rules,
             this.clients,
             this.orderManger,
+            this.ruleContainer,
         );
         await worker.handle();
 

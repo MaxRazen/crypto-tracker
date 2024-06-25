@@ -2,6 +2,8 @@ import { Rule, Timestamp } from '../types';
 import { now } from '../utils';
 import { RuleStorage } from './storage';
 
+export const RULE_APPLIED = 'rule_applied';
+
 export class RuleContainer {
     private rules: Rule[] = [];
 

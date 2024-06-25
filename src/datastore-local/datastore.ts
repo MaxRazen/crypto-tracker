@@ -26,7 +26,8 @@ export class LocalDatastore {
         try {
             const buf = await fd.readFile();
             const data = rwHandler(buf.toString('utf-8'));
-            await fd.writeFile(data);
+            await fd.truncate();
+            await fd.write(data, 0, 'utf-8');
         } catch (e) {
             console.error(e);
         } finally {

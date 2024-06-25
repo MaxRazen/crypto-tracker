@@ -6,19 +6,11 @@ import { BinanceClient } from './market';
 import { MarketClients } from './types';
 import { RuleContainer, containerFactory } from './rules';
 import { OrderManager } from './order-manager';
-import { EventBus } from './eventbus';
 
 async function main() {
     const cfg = initConfig(process.argv.slice(2));
     const env = loadEnv();
-    const eventBus: EventBus = new EventBus();
 
-    // dd(cfg, env);
-    // const datastore = makeClient(cfg);
-
-    // const recs = await fetchAllActive(datastore);
-    // dd(recs);
-    // dd(datastore.runQuery());
     const orderManager = new OrderManager(env.ORDER_MANAGER_ENDPOINT);
 
     const clients: MarketClients = {
@@ -26,8 +18,9 @@ async function main() {
     };
 
     try {
+        // TODO: GCP datastore can be used in production
         //const datastore: Datastore = datastoreFactory(env.GCP_PROJECT_ID, env.GCP_KEYFILE, env.GCP_NAMESPACE);
-        const ruleContainer: RuleContainer = containerFactory(eventBus, env.ACTIVATION_TIMEOUT);
+        const ruleContainer: RuleContainer = containerFactory(env.ACTIVATION_TIMEOUT);
         await ruleContainer.load();
         const ticker = new Ticker(ruleContainer, clients, orderManager, env.TICK_TIMEOUT);
         ticker.start();

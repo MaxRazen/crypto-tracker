@@ -1,4 +1,5 @@
 import { IOrderManager } from '../order-manager';
+import { RuleContainer } from '../rules';
 import { calculateSeriesChange } from '../trader/calculation';
 import { Action, Activator, ActivatorSide, Candle, MarketClients, OrderCreationData, Pair, PairPrice, Rule } from '../types';
 import { uniq } from 'lodash-es';
@@ -6,18 +7,12 @@ import { uniq } from 'lodash-es';
 type PromiseJob = () => Promise<void>;
 
 export class TickerWorker {
-    private rules: Rule[]
-    private cliients: MarketClients
-    private orderManager: IOrderManager
-
     constructor(
-        rules: Rule[],
-        clients: MarketClients,
-        orderManager: IOrderManager,
+        private rules: Rule[],
+        private clients: MarketClients,
+        private orderManager: IOrderManager,
+        private ruleContainer: RuleContainer,
     ) {
-        this.rules = rules;
-        this.cliients = clients;
-        this.orderManager = orderManager;
     }
 
     public async handle(): Promise<void> {
@@ -53,7 +48,7 @@ export class TickerWorker {
 
         const results: PairPrice[][] = await Promise.all(
             grouppedMarkets.map((market: string): Promise<PairPrice[]> => {
-                const client = this.cliients[market];
+                const client = this.clients[market];
                 const pairs: Pair[] = grouped[market].map((r: Rule): Pair => r.pair);
 
                 return client.getPrice(uniq(pairs));
@@ -79,7 +74,7 @@ export class TickerWorker {
     private async handleSeriesRules(rules: Rule[]): Promise<void> {
         const results: Candle[][] = await Promise.all(
             rules.map((rule: Rule): Promise<Candle[]> => {
-                const client = this.cliients[rule.market];
+                const client = this.clients[rule.market];
 
                 return client.getCandles(rule.pair, rule.timeframe, rule.seriesLimit);
             })
@@ -135,7 +130,6 @@ export class TickerWorker {
             this.orderManager.createOrder(orderCreateData);
         });
 
-        // TODO: think how to call RuleContainer indirectly
-        // await this.ruleContainer.markAsCompleted(rule);
+        this.ruleContainer.markAsCompleted(rule.uid);
     }
 }
