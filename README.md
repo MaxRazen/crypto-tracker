@@ -2,8 +2,8 @@
 
 ## Roadmap
 
-- [ ] Ticker & worker implementation
-- [ ] Order manager integration
+- [x] Ticker & worker implementation
+- [x] Order manager integration
 - [ ] Enhance logging & tracing functionality
 - [ ] Rules API (CRUD endpoints, rule validation)
 - [ ] Basic WebUI to manage the rules

@@ -1,15 +1,14 @@
-import express from 'express';
-import { Request, Response, Express, response } from 'express';
-import { initConfig, loadEnv, RuntimeConfig } from './config';
+import { EnvVariables, RuntimeConfig, initConfig, loadEnv } from './config';
 import { Ticker } from './ticker';
 import { BinanceClient } from './market';
 import { MarketClients } from './types';
 import { RuleContainer, containerFactory } from './rules';
 import { OrderManager } from './order-manager';
+import { WebServer } from './webserver';
 
 async function main() {
-    const cfg = initConfig(process.argv.slice(2));
-    const env = loadEnv();
+    const cfg: RuntimeConfig = initConfig(process.argv.slice(2));
+    const env: EnvVariables = loadEnv();
 
     const orderManager = new OrderManager(env.ORDER_MANAGER_ENDPOINT);
 
@@ -30,23 +29,9 @@ async function main() {
     }
 
     process.on('SIGINT', onShutdown);
-    initServer(cfg);
-}
 
-function initServer(cfg: RuntimeConfig) {
-    const server: Express = express();
-
-    server.get('/', (req: Request, res: Response) => {
-        res.send('*** Server is working ***')
-    });
-
-    server.post('/rules', (req: Request, res: Response) => {
-        response.sendStatus(201);
-    })
-
-    server.listen(cfg.port, () => {
-        console.log('App is now running on: :' + cfg.port)
-    });
+    const server: WebServer = new WebServer(cfg.port);
+    server.registerRoutes().start();
 }
 
 function onShutdown() {

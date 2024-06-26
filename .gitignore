@@ -1,5 +1,6 @@
 .env
 .data.env.example
+.tempdir
 dist
 gcp.json
 node_modules

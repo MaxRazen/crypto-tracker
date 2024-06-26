@@ -1,20 +1,23 @@
 import { OrderCreationData } from '../types';
-import { sleep } from '../utils';
+import { OrderManagerClient } from './client';
 
 export interface IOrderManager {
     createOrder(orderCreateData: any): Promise<void>;
 }
 
 export class OrderManager implements IOrderManager {
-    private endpoint: string
+    private client: OrderManagerClient;
 
     constructor(endpoint: string) {
-        this.endpoint = endpoint;
+        this.client = new OrderManagerClient(endpoint);
     }
 
     public async createOrder(orderCreateData: OrderCreationData): Promise<void> {
-        // TODO: add a call to OrderManager service
-        console.log('OrderManager::createOrder', orderCreateData);
-        await sleep(1000);
+        try {
+            await this.client.createOrder(orderCreateData);
+            console.log('OrderManager: order placed');
+        } catch (e) {
+            console.error('OrderManager client error:', e.message);
+        }
     }
 }

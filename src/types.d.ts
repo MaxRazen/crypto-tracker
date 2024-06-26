@@ -30,7 +30,7 @@ export type Action = {
 }
 
 export type DeadlineType = 'time';
-export type DeadlineAction = 'sellByMarket' | 'buyByMarket';
+export type DeadlineAction = 'sell_by_market' | 'buy_by_market';
 
 export type Deadline = {
     type: DeadlineType

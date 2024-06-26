@@ -100,10 +100,6 @@ export class Ticker {
     }
 
     private validateRules(rules: Rule[]): void {
-        if (rules.length === 0) {
-            throw new Error('rules were not passed to Ticker');
-        }
-
         rules.forEach((r: Rule) => {
             if (!this.clients[r.market]) {
                 throw new Error(`rule ${r.pair}-${r.timeframe} has unsupported market '${r.market}'`);
