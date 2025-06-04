@@ -1,6 +1,7 @@
 .env
-.data.env.example
-.tempdir
+.data
+.env.example
+ordermanager.proto
 dist
 gcp.json
 node_modules
