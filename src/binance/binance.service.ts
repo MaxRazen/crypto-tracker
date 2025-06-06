@@ -16,6 +16,10 @@ export class BinanceService {
     this.version = config.apiVersion;
   }
 
+  sanitizeSymbol(pair: string): string {
+    return pair.toUpperCase().replaceAll('-', '');
+  }
+
   async tickerPrice(tickers: string[]) {
     const query = `symbols=` + JSON.stringify(tickers);
 
