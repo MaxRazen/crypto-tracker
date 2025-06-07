@@ -9,8 +9,8 @@ export type RuleActionQuantity = {
 };
 
 export type RuleAction = {
-  type: 'buy' | 'sell';
-  behavior: 'limit' | 'market';
+  side: 'buy' | 'sell';
+  type: 'limit' | 'market';
   price: string;
   quantity: RuleActionQuantity;
 };

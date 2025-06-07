@@ -1,8 +1,8 @@
+import { SPOT_REST_API_TESTNET_URL } from '@binance/spot';
 import { registerAs } from '@nestjs/config';
 
 export type BinanceConfig = {
   baseUrl: string;
-  apiVersion: string;
   apiKey: string;
   apiSecret: string;
 };
@@ -10,8 +10,7 @@ export type BinanceConfig = {
 export default registerAs(
   'binance',
   (): BinanceConfig => ({
-    baseUrl: process.env.BINANCE_API_URL || 'https://api.binance.com',
-    apiVersion: process.env.BINANCE_API_VERSION || 'v3',
+    baseUrl: process.env.BINANCE_API_URL || SPOT_REST_API_TESTNET_URL,
     apiKey: process.env.BINANCE_API_KEY || '',
     apiSecret: process.env.BINANCE_API_SECRET || '',
   }),

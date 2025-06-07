@@ -1,30 +1,82 @@
-import { HttpService } from 'nestjs-http-promise';
-import { Inject, Injectable } from '@nestjs/common';
-import binanceConfig from './binance.config';
-import { ConfigType } from '@nestjs/config';
+import { Injectable, Logger } from '@nestjs/common';
+import { BinanceOrderRequest } from './binance.types';
+import { BinanceFactory } from './binance.factory';
+import { Spot, SpotRestAPI } from '@binance/spot';
 
 @Injectable()
 export class BinanceService {
-  private readonly version: string;
+  private readonly logger = new Logger(BinanceService.name);
 
-  constructor(
-    private httpService: HttpService,
+  private readonly client: Spot;
 
-    @Inject(binanceConfig.KEY)
-    config: ConfigType<typeof binanceConfig>,
-  ) {
-    this.version = config.apiVersion;
+  constructor(binanceFactory: BinanceFactory) {
+    this.client = binanceFactory.makeClient();
   }
 
   sanitizeSymbol(pair: string): string {
     return pair.toUpperCase().replaceAll('-', '');
   }
 
-  async tickerPrice(tickers: string[]) {
-    const query = `symbols=` + JSON.stringify(tickers);
+  async tickerPrice(pairs: string[]) {
+    const response = await this.client.restAPI.tickerPrice({
+      symbols: this.wrapSymbols(pairs.map((p) => this.sanitizeSymbol(p))),
+    });
+    return (await response.data()) as SpotRestAPI.TickerPriceResponse2;
+  }
 
-    return this.httpService.get<Array<{ symbol: string; price: string }>>(
-      `/api/${this.version}/ticker/price?` + query,
-    );
+  async exchangeInfo(pairs: string[]) {
+    const response = await this.client.restAPI.exchangeInfo({
+      symbols: this.wrapSymbols(pairs.map((p) => this.sanitizeSymbol(p))),
+    });
+    return await response.data();
+  }
+
+  async accountInfo(): Promise<SpotRestAPI.GetAccountResponse> {
+    const response = await this.client.restAPI.getAccount({
+      omitZeroBalances: true,
+    });
+    return await response.data();
+  }
+
+  async createOrder(
+    orderRequest: BinanceOrderRequest,
+  ): Promise<SpotRestAPI.NewOrderResponse> {
+    const response = await this.client.restAPI.newOrder({
+      newClientOrderId: orderRequest.uid,
+      symbol: orderRequest.symbol,
+      side: SpotRestAPI.NewOrderSideEnum[orderRequest.side],
+      type: SpotRestAPI.NewOrderTypeEnum[orderRequest.type],
+      quantity: orderRequest.quantity,
+      price: orderRequest.price,
+      timeInForce: SpotRestAPI.NewOrderTimeInForceEnum.GTC,
+    });
+
+    return await response.data();
+  }
+
+  async cancelOrder(
+    pair: string,
+    orderId: number,
+  ): Promise<SpotRestAPI.DeleteOrderResponse> {
+    const response = await this.client.restAPI.deleteOrder({
+      symbol: this.sanitizeSymbol(pair),
+      orderId,
+    });
+    return await response.data();
+  }
+
+  async getOrder(
+    pair: string,
+    orderId: number,
+  ): Promise<SpotRestAPI.GetOrderResponse> {
+    const response = await this.client.restAPI.getOrder({
+      symbol: this.sanitizeSymbol(pair),
+      orderId,
+    });
+    return await response.data();
+  }
+
+  private wrapSymbols(symbols: string[]) {
+    return [JSON.stringify(symbols)];
   }
 }

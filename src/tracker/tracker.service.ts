@@ -15,46 +15,50 @@ export class TrackerService {
     private orderService: OrderService,
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE, {
+  @Cron(CronExpression.EVERY_30_SECONDS, {
     name: 'ticker-tracker',
     waitForCompletion: true,
   })
   async trackTickers() {
     this.logger.debug('Track tickers running');
 
-    const rules = await this.ruleService.getActiveRules();
-    if (!rules.length) {
-      this.logger.debug('No rules to process');
-      return;
-    }
-
-    const { data: prices } = await this.binanceService.tickerPrice(
-      rules.map((t) => this.binanceService.sanitizeSymbol(t.pair)),
-    );
-
-    const activated = rules.filter((r) => {
-      const symbolPrice = prices.find(
-        (p) => p.symbol === this.binanceService.sanitizeSymbol(r.pair),
-      );
-      if (symbolPrice) {
-        return this.checkActivators(r, symbolPrice.price);
+    try {
+      const rules = await this.ruleService.getActiveRules();
+      if (!rules.length) {
+        this.logger.debug('No rules to process');
+        return;
       }
-      return false;
-    });
 
-    if (!activated.length) {
-      this.logger.debug('Track tickers fished');
-      return;
+      const prices = await this.binanceService.tickerPrice(
+        rules.map((t) => t.pair),
+      );
+
+      const activated = rules.filter((r) => {
+        const symbolPrice = prices.find(
+          (p) => p.symbol === this.binanceService.sanitizeSymbol(r.pair),
+        );
+        if (symbolPrice) {
+          return this.checkActivators(r, symbolPrice.price);
+        }
+        return false;
+      });
+
+      if (!activated.length) {
+        this.logger.debug('Track tickers fished');
+        return;
+      }
+
+      this.logger.log(`${activated.length} rules to be applied`);
+
+      for (const rule of activated) {
+        this.logger.log(`Applying the rule #${rule.uid} ${rule.pair}`);
+        await this.applyActions(rule);
+      }
+
+      await this.ruleService.syncRules(activated);
+    } catch (e) {
+      this.logger.error(e.message, e.stack);
     }
-
-    this.logger.log(`${activated.length} rules to be applied`);
-
-    for (const rule of activated) {
-      this.logger.log(`Applying the rule #${rule.uid} ${rule.pair}`);
-      await this.applyActions(rule);
-    }
-
-    await this.ruleService.syncRules(activated);
 
     this.logger.debug('Track tickers fished');
   }
@@ -69,13 +73,14 @@ export class TrackerService {
 
   async applyActions(rule: Rule) {
     const action = rule.actions.find(
-      (a) => a.type === 'buy' || a.type === 'sell',
+      (a) => a.side === 'buy' || a.side === 'sell',
     );
 
     if (action) {
       this.orderService.placeOrder({
         uid: rule.uid,
         pair: rule.pair,
+        side: action.side,
         type: action.type,
         price: action.price,
         quantity: action.quantity,
