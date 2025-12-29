@@ -14,13 +14,16 @@ import { RuleEntity } from './rule/rule.entity';
 import { PositionEntity } from './order/position.entity';
 import { PositionCooldownEntity } from './order/position-cooldown.entity';
 import storageConfig from './storage/storage.config';
+import authConfig from './auth/auth.config';
 import { ConfigService } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [storageConfig],
     }),
+    ConfigModule.forFeature(authConfig),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -51,6 +54,7 @@ import { ConfigService } from '@nestjs/config';
     StorageModule,
     ExchangeModule,
     ApiModule,
+    AuthModule,
   ],
   controllers: [AppController],
 })

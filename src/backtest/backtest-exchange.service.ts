@@ -112,6 +112,9 @@ export class BacktestExchangeService {
       remaining: 0,
       cost: cost,
       average: price,
+      lastTradeTimestamp: this.currentTimestamp,
+      reduceOnly: false,
+      postOnly: false,
       fee: {
         currency: side === 'buy' ? baseAsset : quoteAsset,
         cost: cost * 0.001, // 0.1% fee (typical exchange fee)
@@ -219,6 +222,9 @@ export class BacktestExchangeService {
         remaining: 0,
         cost: cost,
         average: executionPrice,
+        lastTradeTimestamp: this.currentTimestamp,
+        reduceOnly: false,
+        postOnly: false,
         fee: {
           currency: side === 'buy' ? baseAsset : quoteAsset,
           cost: cost * 0.001,
@@ -269,7 +275,13 @@ export class BacktestExchangeService {
         filled: 0,
         remaining: amount,
         cost: 0,
-        fee: {},
+        lastTradeTimestamp: undefined,
+        reduceOnly: false,
+        postOnly: false,
+        fee: {
+          currency: side === 'buy' ? quoteAsset : baseAsset,
+          cost: 0,
+        },
         trades: [],
         info: {},
       };
