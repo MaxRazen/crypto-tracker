@@ -15,5 +15,6 @@ export type Order = {
   submittedAt?: number;
   status?: 'new' | 'pending' | 'failed' | 'completed' | 'cancelled';
   errorMessage?: string;
-  externalUid?: number;
+  externalUid?: string;
+  actionId?: string;
 };

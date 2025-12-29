@@ -19,6 +19,13 @@ export class OrderRepository {
     return entities.map((entity) => this.entityToOrder(entity));
   }
 
+  async findByActionId(actionId: string): Promise<Order | null> {
+    const entity = await this.repository.findOne({
+      where: { actionId },
+    });
+    return entity ? this.entityToOrder(entity) : null;
+  }
+
   async create(order: Order): Promise<void> {
     const entity = this.orderToEntity(order);
     await this.repository.save(entity);
@@ -42,6 +49,7 @@ export class OrderRepository {
     entity.status = order.status || 'new';
     entity.errorMessage = order.errorMessage;
     entity.externalUid = order.externalUid;
+    entity.actionId = order.actionId;
     return entity;
   }
 
@@ -58,6 +66,7 @@ export class OrderRepository {
       status: entity.status,
       errorMessage: entity.errorMessage,
       externalUid: entity.externalUid,
+      actionId: entity.actionId,
     };
   }
 }

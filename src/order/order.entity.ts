@@ -39,8 +39,11 @@ export class OrderEntity {
   @Column({ nullable: true, type: 'text' })
   errorMessage?: string;
 
-  @Column({ nullable: true, type: 'integer' })
-  externalUid?: number;
+  @Column({ nullable: true, type: 'text' })
+  externalUid?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  actionId?: string;
 
   @CreateDateColumn()
   createdAt: Date;

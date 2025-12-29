@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrderService } from './order.service';
-import { BinanceModule } from '../binance/binance.module';
 import { ConfigModule } from '@nestjs/config';
 import orderConfig from './order.config';
 import { StorageModule } from '../storage/storage.module';
@@ -11,11 +10,7 @@ describe('OrderService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forFeature(orderConfig),
-        StorageModule,
-        BinanceModule,
-      ],
+      imports: [ConfigModule.forFeature(orderConfig), StorageModule],
       providers: [OrderRepository, OrderService],
     }).compile();
 
