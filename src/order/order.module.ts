@@ -4,10 +4,15 @@ import { BinanceModule } from '../binance/binance.module';
 import { ConfigModule } from '@nestjs/config';
 import orderConfig from './order.config';
 import { OrderRepository } from './order.repository';
-import { StorageModule } from '../storage/storage.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { OrderEntity } from './order.entity';
 
 @Module({
-  imports: [ConfigModule.forFeature(orderConfig), StorageModule, BinanceModule],
+  imports: [
+    ConfigModule.forFeature(orderConfig),
+    TypeOrmModule.forFeature([OrderEntity]),
+    BinanceModule,
+  ],
   providers: [OrderRepository, OrderService],
   exports: [OrderService],
 })

@@ -1,35 +1,63 @@
 import { Injectable } from '@nestjs/common';
-import { StorageService } from '../storage/storage.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { OrderEntity } from './order.entity';
 import { Order } from './order.types';
 
 @Injectable()
 export class OrderRepository {
-  constructor(private readonly storageService: StorageService) {}
+  constructor(
+    @InjectRepository(OrderEntity)
+    private readonly repository: Repository<OrderEntity>,
+  ) {}
 
-  findActive() {
-    const query = this.storageService
-      .connection()
-      .prepare(
-        `SELECT * FROM orders WHERE status NOT IN ('completed', 'cancelled')`,
-      );
-    const result = query.all();
+  async findActive(): Promise<Order[]> {
+    const entities = await this.repository.find({
+      where: [{ status: 'new' }, { status: 'pending' }],
+    });
 
-    return result.map(({ data }) => JSON.parse(data.toString()));
+    return entities.map((entity) => this.entityToOrder(entity));
   }
 
-  create(order: Order) {
-    const query = this.storageService
-      .connection()
-      .prepare(`INSERT INTO orders (uid, status, data) VALUES (?, ?, ?)`);
-
-    query.run(order.uid, order.status, JSON.stringify(order));
+  async create(order: Order): Promise<void> {
+    const entity = this.orderToEntity(order);
+    await this.repository.save(entity);
   }
 
-  update(order: Order) {
-    const query = this.storageService
-      .connection()
-      .prepare(`UPDATE orders SET status = ?, data = ? WHERE uid = ?`);
+  async update(order: Order): Promise<void> {
+    const entity = this.orderToEntity(order);
+    await this.repository.update({ uid: order.uid }, entity);
+  }
 
-    query.run(order.status, JSON.stringify(order), order.uid);
+  private orderToEntity(order: Order): OrderEntity {
+    const entity = new OrderEntity();
+    entity.uid = order.uid;
+    entity.pair = order.pair;
+    entity.price = order.price;
+    entity.side = order.side;
+    entity.type = order.type;
+    entity.quantity = order.quantity;
+    entity.placedAt = order.placedAt;
+    entity.submittedAt = order.submittedAt;
+    entity.status = order.status || 'new';
+    entity.errorMessage = order.errorMessage;
+    entity.externalUid = order.externalUid;
+    return entity;
+  }
+
+  private entityToOrder(entity: OrderEntity): Order {
+    return {
+      uid: entity.uid,
+      pair: entity.pair,
+      price: entity.price,
+      side: entity.side,
+      type: entity.type,
+      quantity: entity.quantity,
+      placedAt: entity.placedAt,
+      submittedAt: entity.submittedAt,
+      status: entity.status,
+      errorMessage: entity.errorMessage,
+      externalUid: entity.externalUid,
+    };
   }
 }

@@ -1,4 +1,5 @@
 export type RuleActivator = {
+  type: string;
   side: 'lte' | 'gte';
   value: string;
 };
@@ -19,6 +20,10 @@ export type Rule = {
   uid: string;
   active: boolean;
   pair: string;
+  market: string;
+  timeframe: string;
+  fetchType: string;
   activators: RuleActivator[];
   actions: RuleAction[];
+  deadlines: any[];
 };

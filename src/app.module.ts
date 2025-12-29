@@ -6,16 +6,42 @@ import { RuleModule } from './rule/rule.module';
 import { OrderModule } from './order/order.module';
 import { ConfigModule } from '@nestjs/config';
 import { StorageModule } from './storage/storage.module';
+import { ExchangeModule } from './exchange/exchange.module';
+import { AppController } from './app.controller';
+import { ApiModule } from './api/api.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { OrderEntity } from './order/order.entity';
+import { RuleEntity } from './rule/rule.entity';
+import storageConfig from './storage/storage.config';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      load: [storageConfig],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'sqlite',
+        database:
+          configService.get<string>('storage.DB_URL') || '.data/db.sqlite',
+        entities: [OrderEntity, RuleEntity],
+        synchronize: true, // Set to false in production and use migrations
+        logging: false,
+      }),
+      inject: [ConfigService],
+    }),
+    TypeOrmModule.forFeature([OrderEntity, RuleEntity]),
     ScheduleModule.forRoot(),
     TrackerModule,
     BinanceModule,
     RuleModule,
     OrderModule,
     StorageModule,
+    ExchangeModule,
+    ApiModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

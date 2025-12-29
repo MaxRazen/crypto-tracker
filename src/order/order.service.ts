@@ -22,8 +22,8 @@ export class OrderService implements OnModuleInit {
     private config: ConfigType<typeof orderConfig>,
   ) {}
 
-  onModuleInit() {
-    this.orders = this.orderRepository.findActive();
+  async onModuleInit() {
+    this.orders = await this.orderRepository.findActive();
     this.logger.debug(
       `Order service initialized with saved active orders`,
       this.orders,
@@ -42,7 +42,7 @@ export class OrderService implements OnModuleInit {
       placedAt: new Date().getTime(),
     });
 
-    this.orderRepository.create(this.orders[this.orders.length - 1]);
+    await this.orderRepository.create(this.orders[this.orders.length - 1]);
 
     this.logger.log(`Order UID:${dto.uid} placed`);
   }
@@ -103,7 +103,7 @@ export class OrderService implements OnModuleInit {
       order.status = 'pending';
       order.submittedAt = new Date().getTime();
 
-      this.orderRepository.update(order);
+      await this.orderRepository.update(order);
 
       this.logger.log(
         `Order UID:${order.uid} submitted to Binance`,
@@ -137,7 +137,7 @@ export class OrderService implements OnModuleInit {
       if (submittedOrder.status === 'FILLED') {
         order.status = 'completed';
         this.logger.log(`Order UID:${order.uid} completed`, submittedOrder);
-        this.orderRepository.update(order);
+        await this.orderRepository.update(order);
       } else if (
         submittedOrder.status === 'CANCELED' ||
         submittedOrder.status === 'REJECTED' ||
@@ -148,7 +148,7 @@ export class OrderService implements OnModuleInit {
           `Order UID:${order.uid} cancelled/rejected on Binance`,
           submittedOrder,
         );
-        this.orderRepository.update(order);
+        await this.orderRepository.update(order);
       }
     } catch (error) {
       this.logger.error(

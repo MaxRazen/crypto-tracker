@@ -1,59 +1,51 @@
-import { readFile, writeFile } from 'node:fs/promises';
 import { Injectable, Logger } from '@nestjs/common';
+import { RuleRepository } from './rule.repository';
 import { Rule } from './rule.types';
 
 @Injectable()
 export class RuleService {
   private readonly logger = new Logger(RuleService.name);
 
-  private readonly filepath = 'rules.json';
+  constructor(private readonly ruleRepository: RuleRepository) {}
 
-  async getActiveRules() {
-    const rules = await this.loadRules();
-
-    return rules.filter((r) => r.active);
+  async getActiveRules(): Promise<Rule[]> {
+    return await this.ruleRepository.findActive();
   }
 
-  async syncRules(dirtyRules: Rule[]) {
-    const rules = await this.loadRules();
+  async getAllRules(): Promise<Rule[]> {
+    return await this.ruleRepository.findAll();
+  }
+
+  async getRule(uid: string): Promise<Rule | null> {
+    return await this.ruleRepository.findOne(uid);
+  }
+
+  async syncRules(dirtyRules: Rule[]): Promise<void> {
+    const rules = await this.ruleRepository.findAll();
 
     let isSaveNeeded = false;
-    rules.forEach((rule) => {
+    for (const rule of rules) {
       const dirtyRule = dirtyRules.find((r) => r.uid === rule.uid);
       if (!dirtyRule) {
-        return;
+        continue;
       }
       if (rule.active !== dirtyRule.active) {
         rule.active = dirtyRule.active;
+        await this.ruleRepository.save(rule);
         isSaveNeeded = true;
       }
-    });
-
-    if (!isSaveNeeded) {
-      return;
     }
 
-    try {
-      await writeFile(this.filepath, JSON.stringify(rules, null, 2));
-    } catch (e) {
-      this.logger.fatal(e.message, e.stack);
+    if (isSaveNeeded) {
+      this.logger.log('Rules synchronized');
     }
   }
 
-  private async loadRules() {
-    try {
-      const rules = await readFile(this.filepath);
-      return this.parseRules(rules.toString());
-    } catch (e) {
-      this.logger.fatal(e.message, e.stack);
-    }
+  async saveRule(rule: Rule): Promise<void> {
+    await this.ruleRepository.save(rule);
   }
 
-  private parseRules(rawRules: string) {
-    const rules = JSON.parse(rawRules) as Array<Rule>;
-    if (!Array.isArray(rules)) {
-      throw new Error('Loaded rules must be a valid JSON array');
-    }
-    return rules;
+  async updateRule(uid: string, rule: Partial<Rule>): Promise<void> {
+    await this.ruleRepository.update(uid, rule as Rule);
   }
 }
