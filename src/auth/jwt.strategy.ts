@@ -5,16 +5,16 @@ import { ConfigService } from '@nestjs/config';
 import { AuthConfig } from './auth.config';
 
 export interface JwtPayload {
-  sub: string; // User ID or subject
-  email?: string;
+  sub: string;
+  username: string;
   iat?: number;
   exp?: number;
-  [key: string]: any; // Allow additional claims
+  [key: string]: any;
 }
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private configService: ConfigService) {
+  constructor(configService: ConfigService) {
     const authConfig = configService.get<AuthConfig>('auth');
 
     if (!authConfig?.jwtSecret && !authConfig?.jwtPublicKey) {
@@ -23,16 +23,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       );
     }
 
-    const isRS256 = authConfig.jwtAlgorithm === 'RS256';
-    const secretOrKey = isRS256
-      ? authConfig.jwtPublicKey || authConfig.jwtSecret
-      : authConfig.jwtSecret;
-
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: secretOrKey,
-      algorithms: [authConfig.jwtAlgorithm || 'HS256'],
+      secretOrKey: authConfig.jwtSecret,
+      algorithms: ['HS256'],
     });
   }
 
