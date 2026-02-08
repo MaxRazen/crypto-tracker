@@ -4,7 +4,6 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiOrdersService } from './api.orders.service';
 import { FetchOrdersDto } from './dto/fetch-orders.dto';

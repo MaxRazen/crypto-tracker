@@ -1,4 +1,11 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -9,9 +16,11 @@ import {
 import { BacktestService } from '../../backtest/backtest.service';
 import { RunBacktestDto } from './dto/run-backtest.dto';
 import { BacktestResult } from '../../backtest/backtest.types';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 @ApiTags('backtest')
 @ApiBearerAuth('JWT-auth')
+@UseGuards(JwtAuthGuard)
 @Controller('api/backtest')
 export class ApiBacktestController {
   constructor(private readonly backtestService: BacktestService) {}

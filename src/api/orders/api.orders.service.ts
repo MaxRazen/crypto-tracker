@@ -39,6 +39,7 @@ export class ApiOrdersService {
   ): Promise<Order[]> {
     // Sanitize symbol if provided
     const symbol = pair ? this.sanitizeSymbol(pair) : undefined;
+    console.log('symbol', symbol);
 
     // Fetch orders from the exchange
     let orders: Order[] = [];

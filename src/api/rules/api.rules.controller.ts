@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,15 +16,16 @@ import {
   ApiResponse,
   ApiParam,
   ApiBearerAuth,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiRulesService } from './api.rules.service';
 import { CreateRuleDto } from './dto/create-rule.dto';
 import { UpdateRuleDto } from './dto/update-rule.dto';
 import { Rule } from '../../rule/rule.types';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 @ApiTags('rules')
 @ApiBearerAuth('JWT-auth')
+@UseGuards(JwtAuthGuard)
 @Controller('api/rules')
 export class ApiRulesController {
   constructor(private readonly apiRulesService: ApiRulesService) {}
