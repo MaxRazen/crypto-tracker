@@ -5,7 +5,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { ApiOrdersService } from './api.orders.service';
+import { ApiOrdersService, OrderPerformance } from './api.orders.service';
 import { FetchOrdersDto } from './dto/fetch-orders.dto';
 import { Order } from 'ccxt';
 
@@ -25,20 +25,9 @@ export class ApiOrderController {
   @ApiResponse({
     status: 200,
     description: 'Orders retrieved successfully',
-    type: [Object],
+    type: Object,
   })
-  async fetchOrders(@Body() dto: FetchOrdersDto): Promise<Order[]> {
-    const exchangeId = dto.exchange || 'binance';
-
-    // Convert date strings to timestamps
-    const since = dto.since ? new Date(dto.since).getTime() : undefined;
-    const until = dto.until ? new Date(dto.until).getTime() : undefined;
-
-    return await this.apiOrdersService.fetchOrders(
-      exchangeId,
-      dto.pair,
-      since,
-      until,
-    );
+  async fetchOrders(@Body() dto: FetchOrdersDto): Promise<{ orders: Order[]; performance?: OrderPerformance }> {
+    return await this.apiOrdersService.fetchOrders(dto);
   }
 }

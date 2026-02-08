@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsDateString } from 'class-validator';
+import { IsOptional, IsString, IsDateString, IsBoolean } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class FetchOrdersDto {
@@ -38,4 +38,13 @@ export class FetchOrdersDto {
   @IsOptional()
   @IsString()
   exchange?: string;
+
+  @ApiPropertyOptional({
+    description: 'Compute performance',
+    example: true,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  computePerformance?: boolean;
 }
