@@ -6,11 +6,44 @@
 - [x] Order manager integration
 - [ ] Enhance logging & tracing functionality
 - [ ] Rules API (CRUD endpoints, rule validation)
-- [ ] Basic WebUI to manage the rules
-- [ ] WebUI Authentication
+- [x] Basic WebUI to manage the rules
+- [x] WebUI Authentication
 - [ ] Notification service integration
 - [ ] Broadcast logs onto WebUI
 
+## WebUI
+
+The WebUI is a Vue 3 SPA in `packages/web`, served by NestJS in production.
+
+### Development
+
+```bash
+# Terminal 1: NestJS API
+yarn start:dev
+
+# Terminal 2: Vite dev server (proxies /api and /auth to NestJS)
+yarn dev:web
+```
+
+Open http://localhost:5173 for the WebUI.
+
+### Production
+
+```bash
+yarn build    # Builds web + NestJS
+yarn start:prod
+```
+
+The SPA is served at `/` when accessing the NestJS server (default port 3000).
+
+### Auth
+
+Set `WEB_USER` and `WEB_PASSWORD` env vars (default: `admin` / `admin`).
+
+```bash
+export WEB_USER=myuser
+export WEB_PASSWORD=mysecret
+```
 
 -----
 

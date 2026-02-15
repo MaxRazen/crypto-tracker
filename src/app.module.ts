@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { TrackerModule } from './tracker/tracker.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RuleModule } from './rule/rule.module';
@@ -59,6 +61,11 @@ import { RuleEngineModule } from './rule-engine/rule-engine.module';
     AuthModule,
     DataProviderModule,
     RuleEngineModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'packages', 'web', 'dist'),
+      serveRoot: '/',
+      exclude: ['/api/{*any}', '/auth/{*any}'],
+    }),
   ],
   controllers: [AppController],
 })

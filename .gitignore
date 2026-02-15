@@ -1,6 +1,8 @@
 # compiled output
 /dist
 /node_modules
+/packages/web/node_modules
+/packages/web/dist
 /build
 
 # Logs
