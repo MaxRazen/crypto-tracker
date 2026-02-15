@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { RuleService } from '../rule/rule.service';
-import { Rule } from '../rule/rule.types';
+import { Rule, isOrderAction } from '../rule/rule.types';
 import { OrderService } from '../order/order.service';
 import { ExchangeService } from '../exchange/exchange.service';
 import { PriceFetcherService } from './price-fetcher.service';
@@ -67,19 +67,16 @@ export class TrackerService {
           continue;
         }
 
-        // Check if action should be executed
-        const action = rule.actions.find(
-          (a) => a.side === 'buy' || a.side === 'sell',
-        );
-
+        // Find a buy/sell action
+        const action = rule.actions.find(isOrderAction);
         if (!action) {
           continue;
         }
 
         // Check if we should skip this action
-        if (await this.shouldSkipAction(rule.pair, action.side)) {
+        if (await this.shouldSkipAction(rule.pair, action.type)) {
           this.logger.debug(
-            `Skipping action for ${rule.pair} ${action.side} - position exists or in cooldown`,
+            `Skipping action for ${rule.pair} ${action.type} - position exists or in cooldown`,
           );
           continue;
         }
@@ -164,10 +161,7 @@ export class TrackerService {
   }
 
   async applyActions(rule: Rule) {
-    const action = rule.actions.find(
-      (a) => a.side === 'buy' || a.side === 'sell',
-    );
-
+    const action = rule.actions.find(isOrderAction);
     if (!action) {
       return;
     }
@@ -179,17 +173,17 @@ export class TrackerService {
     await this.orderService.placeOrder({
       uid: rule.uid,
       pair: rule.pair,
-      side: action.side,
-      type: action.type,
-      price: action.price,
-      quantity: action.quantity,
+      side: action.type,
+      type: action.context.type,
+      price: action.context.price,
+      quantity: action.context.quantity,
       actionId,
     });
 
     // Update cooldown period
     await this.positionCooldownRepository.updateCooldown(
       rule.pair,
-      action.side,
+      action.type,
       this.DEFAULT_COOLDOWN_PERIOD,
     );
 

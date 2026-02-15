@@ -17,6 +17,8 @@ import storageConfig from './storage/storage.config';
 import authConfig from './auth/auth.config';
 import { ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { DataProviderModule } from './data-provider/data-provider.module';
+import { RuleEngineModule } from './rule-engine/rule-engine.module';
 
 @Module({
   imports: [
@@ -55,6 +57,8 @@ import { AuthModule } from './auth/auth.module';
     ExchangeModule,
     ApiModule,
     AuthModule,
+    DataProviderModule,
+    RuleEngineModule,
   ],
   controllers: [AppController],
 })

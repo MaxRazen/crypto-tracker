@@ -15,6 +15,9 @@ export class RuleEntity {
   @Column({ type: 'boolean', default: true })
   active: boolean;
 
+  @Column({ type: 'boolean', nullable: true })
+  activatedAt: Date | null;
+
   @Column()
   pair: string;
 

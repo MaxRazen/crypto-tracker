@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
-import { RuleRepository } from '../../rule/rule.repository';
+import { RuleService } from '../../rule/rule.service';
 import { Rule } from '../../rule/rule.types';
 import { CreateRuleDto } from './dto/create-rule.dto';
 import { UpdateRuleDto } from './dto/update-rule.dto';
@@ -8,7 +8,7 @@ import { UpdateRuleDto } from './dto/update-rule.dto';
 export class ApiRulesService {
   private readonly logger = new Logger(ApiRulesService.name);
 
-  constructor(private readonly ruleRepository: RuleRepository) {}
+  constructor(private readonly ruleService: RuleService) {}
 
   async create(createRuleDto: CreateRuleDto): Promise<Rule> {
     const rule: Rule = {
@@ -23,17 +23,17 @@ export class ApiRulesService {
       deadlines: createRuleDto.deadlines || [],
     };
 
-    await this.ruleRepository.save(rule);
+    await this.ruleService.saveRule(rule);
     this.logger.log(`Rule ${rule.uid} created`);
     return rule;
   }
 
   async findAll(): Promise<Rule[]> {
-    return await this.ruleRepository.findAll();
+    return await this.ruleService.getAllRules();
   }
 
   async findOne(uid: string): Promise<Rule> {
-    const rule = await this.ruleRepository.findOne(uid);
+    const rule = await this.ruleService.getRule(uid);
     if (!rule) {
       throw new NotFoundException(`Rule with uid ${uid} not found`);
     }
@@ -41,11 +41,11 @@ export class ApiRulesService {
   }
 
   async findActive(): Promise<Rule[]> {
-    return await this.ruleRepository.findActive();
+    return await this.ruleService.getActiveRules();
   }
 
   async update(uid: string, updateRuleDto: UpdateRuleDto): Promise<Rule> {
-    const existingRule = await this.ruleRepository.findOne(uid);
+    const existingRule = await this.ruleService.getRule(uid);
     if (!existingRule) {
       throw new NotFoundException(`Rule with uid ${uid} not found`);
     }
@@ -55,18 +55,18 @@ export class ApiRulesService {
       ...updateRuleDto,
     };
 
-    await this.ruleRepository.update(uid, updatedRule);
+    await this.ruleService.updateRule(uid, updatedRule);
     this.logger.log(`Rule ${uid} updated`);
     return updatedRule;
   }
 
   async remove(uid: string): Promise<void> {
-    const rule = await this.ruleRepository.findOne(uid);
+    const rule = await this.ruleService.getRule(uid);
     if (!rule) {
       throw new NotFoundException(`Rule with uid ${uid} not found`);
     }
 
-    await this.ruleRepository.delete(uid);
+    await this.ruleService.deleteRule(uid);
     this.logger.log(`Rule ${uid} deleted`);
   }
 }

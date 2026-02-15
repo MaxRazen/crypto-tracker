@@ -1,5 +1,5 @@
 export type Quantity = {
-  type: 'percent';
+  type: 'fixed' | 'percent';
   value: string;
 };
 

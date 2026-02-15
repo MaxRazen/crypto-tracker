@@ -50,6 +50,7 @@ export class UpdateRuleDto {
         type: 'price',
         side: 'lte',
         value: '50000',
+        timeframe: '1m',
       },
     ],
     type: 'array',
@@ -62,12 +63,14 @@ export class UpdateRuleDto {
     description: 'Array of actions to execute when rule is activated',
     example: [
       {
-        side: 'buy',
-        type: 'market',
-        price: '50000',
-        quantity: {
-          type: 'percent',
-          value: '50',
+        type: 'buy',
+        context: {
+          type: 'market',
+          price: '50000',
+          quantity: {
+            type: 'percent',
+            value: '50',
+          },
         },
       },
     ],

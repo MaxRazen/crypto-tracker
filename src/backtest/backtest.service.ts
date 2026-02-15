@@ -10,7 +10,7 @@ import { HistoricalDataService } from './historical-data.service';
 import { BacktestExchangeService } from './backtest-exchange.service';
 import { BacktestPriceFetcherService } from './backtest-price-fetcher.service';
 import { RuleService } from '../rule/rule.service';
-import { Rule } from '../rule/rule.types';
+import { Rule, isOrderAction } from '../rule/rule.types';
 import { HistoricalCandle } from './backtest.types';
 
 @Injectable()
@@ -154,10 +154,6 @@ export class BacktestService {
         options.quoteCurrency,
       );
 
-      // Process orders (simulate order execution)
-      // Note: In a real implementation, we'd need to inject a backtest-aware OrderService
-      // For now, orders are executed immediately via BacktestExchangeService
-
       // Track equity
       const balance = this.backtestExchangeService.getBalance();
       const quoteBalance = balance[options.quoteCurrency]?.total || 0;
@@ -255,10 +251,8 @@ export class BacktestService {
         continue;
       }
 
-      // Check if action should be executed
-      const action = rule.actions.find(
-        (a) => a.side === 'buy' || a.side === 'sell',
-      );
+      // Find order action
+      const action = rule.actions.find(isOrderAction);
       if (!action) {
         continue;
       }
@@ -267,12 +261,12 @@ export class BacktestService {
       const pair = rule.pair;
       const hasOpenPosition = this.positionHistory.has(pair);
 
-      if (action.side === 'buy' && hasOpenPosition) {
-        continue; // Skip buy if position already exists
+      if (action.type === 'buy' && hasOpenPosition) {
+        continue;
       }
 
-      if (action.side === 'sell' && !hasOpenPosition) {
-        continue; // Skip sell if no position exists
+      if (action.type === 'sell' && !hasOpenPosition) {
+        continue;
       }
 
       // Execute the action
@@ -288,19 +282,21 @@ export class BacktestService {
         }
 
         const orderPrice =
-          action.type === 'market' ? priceData.price : parseFloat(action.price);
+          action.context.type === 'market'
+            ? priceData.price
+            : parseFloat(action.context.price);
 
         let order;
-        if (action.type === 'market') {
+        if (action.context.type === 'market') {
           order = await this.backtestExchangeService.createMarketOrder(
             symbol,
-            action.side,
+            action.type,
             quantity,
           );
         } else {
           order = await this.backtestExchangeService.createLimitOrder(
             symbol,
-            action.side,
+            action.type,
             quantity,
             orderPrice,
           );
@@ -308,13 +304,13 @@ export class BacktestService {
 
         // Track position
         if (order.status === 'closed' && order.filled > 0) {
-          if (action.side === 'buy') {
+          if (action.type === 'buy') {
             this.positionHistory.set(pair, {
               entryPrice: order.average || orderPrice,
               quantity: order.filled,
               entryTime: timestamp,
             });
-          } else if (action.side === 'sell') {
+          } else if (action.type === 'sell') {
             this.positionHistory.delete(pair);
           }
         }
@@ -331,7 +327,10 @@ export class BacktestService {
    */
   private async calculateOrderQuantity(
     rule: Rule,
-    action: { side: 'buy' | 'sell'; quantity: { type: string; value: string } },
+    action: Extract<
+      import('../rule/rule.types').RuleAction,
+      { type: 'buy' | 'sell' }
+    >,
     quoteCurrency: string,
     currentPrice: number,
   ): Promise<number> {
@@ -339,15 +338,14 @@ export class BacktestService {
     const symbol = this.normalizeSymbol(rule.pair);
     const [baseAsset] = symbol.split('/');
 
-    if (action.side === 'buy') {
+    if (action.type === 'buy') {
       const quoteBalance = balance[quoteCurrency]?.free || 0;
-      const percent = parseFloat(action.quantity.value);
+      const percent = parseFloat(action.context.quantity.value);
       const amountToSpend = (quoteBalance * percent) / 100;
       return amountToSpend / currentPrice;
     } else {
       const baseBalance = balance[baseAsset]?.free || 0;
-      const percent = parseFloat(action.quantity.value);
-      // For sell, if percent >= 99, sell all (handle dust)
+      const percent = parseFloat(action.context.quantity.value);
       if (percent >= 99) {
         return baseBalance;
       }
@@ -373,7 +371,6 @@ export class BacktestService {
       const priceData = prices.get(symbol);
 
       if (baseBalance > 0 && priceData) {
-        // Get entry price from position history
         const positionInfo = this.positionHistory.get(pair);
         const averagePrice = positionInfo?.entryPrice || priceData.price;
         const currentPrice = priceData.price;
@@ -473,7 +470,7 @@ export class BacktestService {
       maxDrawdown,
       maxDrawdownPercent,
       trades,
-      positions: [], // Would populate from current positions
+      positions: [],
       equityCurve,
     };
   }
