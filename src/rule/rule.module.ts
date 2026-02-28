@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { RuleService } from './rule.service';
 import { RuleRepository } from './rule.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RuleEntity } from './rule.entity';
+import { RuleEntity } from './entities/rule.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([RuleEntity])],

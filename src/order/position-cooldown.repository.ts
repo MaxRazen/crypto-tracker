@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PositionCooldownEntity } from './position-cooldown.entity';
+import { PositionCooldownEntity } from './entities/position-cooldown.entity';
 
 export interface PositionCooldown {
   pair: string;

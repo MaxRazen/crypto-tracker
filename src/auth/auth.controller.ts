@@ -30,8 +30,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Returns JWT access token' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() dto: LoginDto) {
-    const authConfig =
-      this.configService.get<AuthConfig>('auth');
+    const authConfig = this.configService.get<AuthConfig>('auth');
 
     if (!authConfig?.webUser || !authConfig?.webPassword) {
       throw new UnauthorizedException('Auth not configured');

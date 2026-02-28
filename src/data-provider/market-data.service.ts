@@ -43,7 +43,7 @@ export class MarketDataService {
         limit,
       );
 
-      if (!ohlcv || ohlcv.length === 0) {
+      if (!ohlcv || !ohlcv.length) {
         this.logger.warn(`No historical data for ${ccxtSymbol} ${timeframe}`);
         return;
       }

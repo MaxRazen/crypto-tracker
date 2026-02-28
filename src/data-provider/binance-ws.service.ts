@@ -40,8 +40,8 @@ export class BinanceWsService implements OnModuleDestroy {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   private readonly MAX_RECONNECT_ATTEMPTS = 20;
-  private readonly BASE_RECONNECT_DELAY_MS = 1000;
-  private readonly MAX_RECONNECT_DELAY_MS = 30000;
+  private readonly BASE_RECONNECT_DELAY_MS = 1_000;
+  private readonly MAX_RECONNECT_DELAY_MS = 30_000;
 
   private readonly klineUpdate$ = new Subject<KlineEvent>();
 
@@ -58,7 +58,9 @@ export class BinanceWsService implements OnModuleDestroy {
     }
 
     this.streams = streams;
-    this.logger.log(`Subscribing to ${streams.length} streams: ${streams.join(', ')}`);
+    this.logger.log(
+      `Subscribing to ${streams.length} streams: ${streams.join(', ')}`,
+    );
     this.connect();
 
     return this.klineUpdate$.asObservable();
@@ -97,13 +99,12 @@ export class BinanceWsService implements OnModuleDestroy {
 
     this.ws.on('open', () => {
       this.reconnectAttempts = 0;
-      this.logger.log(
-        `WebSocket connected (${this.streams.length} streams)`,
-      );
+      this.logger.log(`WebSocket connected (${this.streams.length} streams)`);
     });
 
     this.ws.on('message', (data: WebSocket.RawData) => {
       try {
+        this.logger.debug(`Received WS message: ${data.toString()}`);
         const payload = JSON.parse(data.toString()) as BinanceKlinePayload;
 
         if (payload.data?.e === 'kline') {
@@ -128,8 +129,11 @@ export class BinanceWsService implements OnModuleDestroy {
       this.logger.error(`WebSocket error: ${err.message}`);
     });
 
-    this.ws.on('ping', (data: Buffer) => {
-      this.ws?.pong(data);
+    const ws = this.ws;
+    ws.on('ping', (data: Buffer) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.pong(data);
+      }
     });
   }
 

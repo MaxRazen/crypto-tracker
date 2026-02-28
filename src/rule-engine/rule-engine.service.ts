@@ -1,11 +1,28 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { Subject, Observable, Subscription } from 'rxjs';
-import { Rule, RuleActivator, isOrderAction, isRuleActivationAction, isNotificationAction } from '../rule/rule.types';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
+import { Subject, Observable, Subscription, debounceTime } from 'rxjs';
+import modeConfig, { ModeConfig } from '../config/mode.config';
+import {
+  Rule,
+  RuleActivator,
+  isOrderAction,
+  isRuleActivationAction,
+  isNotificationAction,
+  RuleAction,
+} from '../rule/rule.types';
 import { RuleService } from '../rule/rule.service';
 import { DataProviderService } from '../data-provider/data-provider.service';
 import { MarketDataService } from '../data-provider/market-data.service';
 import { IndicatorService } from '../data-provider/indicator.service';
-import { SubscriptionInfo, pairToWsSymbol } from '../data-provider/data-provider.types';
+import {
+  SubscriptionInfo,
+  pairToWsSymbol,
+} from '../data-provider/data-provider.types';
 import {
   ActivatorEvaluation,
   RuleTriggeredEvent,
@@ -49,6 +66,8 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
     private readonly dataProviderService: DataProviderService,
     private readonly marketDataService: MarketDataService,
     private readonly indicatorService: IndicatorService,
+    @Inject(modeConfig.KEY)
+    private readonly modeConfig: ModeConfig,
   ) {}
 
   async onModuleInit() {
@@ -61,12 +80,15 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
       );
     }
 
-    // Hot-reload: when rules change via API, re-initialize the pipeline
-    this.ruleChangeSub = this.ruleService.onRulesChanged$.subscribe(() => {
-      this.reload().catch((err) =>
-        this.logger.error(`Hot-reload failed: ${err.message}`, err.stack),
-      );
-    });
+    // Hot-reload: debounce rapid consecutive changes (e.g. rule trigger + activation
+    // action both fire onRulesChanged$ in the same tick) into a single reload.
+    this.ruleChangeSub = this.ruleService.onRulesChanged$
+      .pipe(debounceTime(100))
+      .subscribe(() => {
+        this.reload().catch((err) =>
+          this.logger.error(`Hot-reload failed: ${err.message}`, err.stack),
+        );
+      });
   }
 
   onModuleDestroy() {
@@ -107,6 +129,10 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
   // ─── lifecycle ───────────────────────────────────────────
 
   private async initialize(): Promise<void> {
+    if (this.modeConfig.isIdleMode) {
+      return;
+    }
+
     const rules = await this.ruleService.getActiveRules();
     if (rules.length === 0) {
       this.logger.warn('No active rules — rule engine idle');
@@ -127,6 +153,10 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async reload(): Promise<void> {
+    if (this.modeConfig.isIdleMode) {
+      return;
+    }
+
     this.logger.log('Hot-reloading rules...');
     this.marketSub?.unsubscribe();
     this.marketSub = null;
@@ -135,6 +165,7 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
     if (rules.length === 0) {
       this.logger.warn('No active rules after reload — engine idle');
       this.rulesBySymbol.clear();
+      await this.dataProviderService.reinitialize([]);
       return;
     }
 
@@ -219,6 +250,12 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
   // ─── rule evaluation ───────────────────────────────────
 
   private evaluateSymbol(wsSymbol: string, timestamp: number): void {
+    if (this.modeConfig.isIdleMode) {
+      return;
+    }
+
+    this.logger.debug(`Evaluating symbol: ${wsSymbol} at ${timestamp}`);
+
     const rules = this.rulesBySymbol.get(wsSymbol);
     if (!rules || rules.length === 0) return;
 
@@ -330,11 +367,10 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
 
   // ─── action dispatching ─────────────────────────────────
 
-  private dispatchActions(
-    rule: Rule,
-    price: number,
-    timestamp: number,
-  ): void {
+  private dispatchActions(rule: Rule, price: number, timestamp: number): void {
+    if (this.modeConfig.isIdleMode) {
+      return;
+    }
     for (const action of rule.actions) {
       if (isOrderAction(action)) {
         this.orderAction$.next({ rule, action, price, timestamp });
@@ -352,7 +388,7 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
    */
   private handleRuleActivation(
     action: Extract<
-      import('../rule/rule.types').RuleAction,
+      RuleAction,
       { type: 'activate' | 'deactivate' }
     >,
   ): void {

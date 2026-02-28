@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { RuleActivator, RuleAction } from './rule.types';
+import { RuleActivator, RuleAction } from '../rule.types';
 
 @Entity('rules')
 export class RuleEntity {

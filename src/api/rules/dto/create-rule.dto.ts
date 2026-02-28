@@ -34,7 +34,8 @@ export class CreateRuleDto {
   market: string;
 
   @ApiProperty({
-    description: 'Timeframe for price data (fallback for activators without explicit timeframe)',
+    description:
+      'Timeframe for price data (fallback for activators without explicit timeframe)',
     example: '1h',
   })
   @IsString()
@@ -48,7 +49,8 @@ export class CreateRuleDto {
   fetchType: string;
 
   @ApiProperty({
-    description: 'Array of rule activators (conditions). All must match for the rule to trigger.',
+    description:
+      'Array of rule activators (conditions). All must match for the rule to trigger.',
     example: [
       {
         type: 'price',

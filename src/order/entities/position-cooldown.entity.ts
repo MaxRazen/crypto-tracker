@@ -17,7 +17,8 @@ export class PositionCooldownEntity {
   @Column({ type: 'bigint' })
   lastActionAt: number;
 
-  @Column({ type: 'integer', default: 300000 }) // Default 5 minutes in milliseconds
+  // Default 5 minutes in milliseconds
+  @Column({ type: 'integer', default: 300_000 })
   cooldownPeriod: number;
 
   @CreateDateColumn()

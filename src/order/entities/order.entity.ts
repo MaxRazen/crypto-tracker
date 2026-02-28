@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Quantity } from './order.types';
+import { Quantity } from '../order.types';
 
 @Entity('orders')
 export class OrderEntity {

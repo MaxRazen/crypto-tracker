@@ -45,6 +45,21 @@ export WEB_USER=myuser
 export WEB_PASSWORD=mysecret
 ```
 
+### Mode
+
+Set `MODE` env var to control runtime behavior:
+
+| Value   | Description |
+|---------|-------------|
+| `idle`  | No WebSocket subscription, no rules executed, no orders can be created |
+| `plane` | WebSocket subscribed, rules evaluated, but no actions (orders, notifications, rule activations) — logs what would be applied |
+| `live`  | Full functionality, production mode |
+
+```bash
+export MODE=plane   # Dry-run mode for testing rules
+export MODE=live    # Production
+```
+
 -----
 
 thoughs
@@ -89,17 +104,6 @@ rule (db entity)
 
 ```mermaid
 graph TD
-    subgraph API["API Module"]
-        REST["REST Endpoints<br/><small>CRUD rules, orders, backtest</small>"]
-    end
-
-    subgraph RM["Rule Module"]
-        RS["RuleService"]
-        RR["RuleRepository"]
-        DB[(SQLite)]
-        RS --> RR --> DB
-    end
-
     subgraph DP["Data Provider Module"]
         BWS["BinanceWsService<br/><small>WebSocket kline streams</small>"]
         MDS["MarketDataService<br/><small>candle buffers + historical seed</small>"]
@@ -117,8 +121,19 @@ graph TD
         OS["OrderService<br/><small>place & track orders</small>"]
     end
 
-    subgraph NM["Notification Module<br/><small>(future)</small>"]
+    subgraph NM["Notification Module"]
         NS["NotificationService"]
+    end
+
+    subgraph API["API Module"]
+        REST["REST Endpoints<br/><small>CRUD rules, orders</small>"]
+    end
+
+    subgraph RM["Rule Module"]
+        RS["RuleService"]
+        RR["RuleRepository"]
+        DB[(SQLite)]
+        RS --> RR --> DB
     end
 
     REST -- "rules CRUD" --> RS

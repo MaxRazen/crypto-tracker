@@ -3,15 +3,13 @@ import { ApiOrdersService } from './orders/api.orders.service';
 import { ApiOrderController } from './orders/api.orders.controller';
 import { ApiRulesService } from './rules/api.rules.service';
 import { ApiRulesController } from './rules/api.rules.controller';
-import { ApiBacktestController } from './backtest/api.backtest.controller';
 import { ExchangeModule } from '../exchange/exchange.module';
 import { RuleModule } from '../rule/rule.module';
-import { BacktestModule } from '../backtest/backtest.module';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [ExchangeModule, RuleModule, BacktestModule, AuthModule],
-  controllers: [ApiOrderController, ApiRulesController, ApiBacktestController],
+  imports: [ExchangeModule, RuleModule, AuthModule],
+  controllers: [ApiOrderController, ApiRulesController],
   providers: [ApiOrdersService, ApiRulesService],
 })
 export class ApiModule {}

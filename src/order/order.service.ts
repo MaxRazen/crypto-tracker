@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Order, Quantity } from './order.types';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import orderConfig from './order.config';
+import modeConfig, { ModeConfig } from '../config/mode.config';
 import { ConfigType } from '@nestjs/config';
 import { OrderRepository } from './order.repository';
 import { ExchangeService } from '../exchange/exchange.service';
@@ -24,16 +25,25 @@ export class OrderService implements OnModuleInit {
 
     @Inject(orderConfig.KEY)
     private config: ConfigType<typeof orderConfig>,
+    @Inject(modeConfig.KEY)
+    private modeConfig: ModeConfig,
   ) {}
 
   async onModuleInit() {
     this.orders = await this.orderRepository.findActive();
-    this.logger.debug(
+    this.logger.log(
       `Order service initialized with ${this.orders.length} active orders`,
     );
   }
 
   async placeOrder(dto: Order) {
+    if (!this.modeConfig.isLiveMode) {
+      this.logger.log(
+        `Order not placed (${this.modeConfig.isIdleMode ? 'idle' : 'plane'} mode): ${dto.side} ${dto.pair} @ ${dto.price}`,
+      );
+      return;
+    }
+
     // Check idempotency: if actionId exists, check if order with same actionId already exists
     if (dto.actionId) {
       const existingOrder = await this.orderRepository.findByActionId(

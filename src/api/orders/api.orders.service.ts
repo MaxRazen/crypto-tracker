@@ -45,7 +45,15 @@ export class ApiOrdersService {
   /**
    * Fetch orders with filters
    */
-  async fetchOrders({ pair, exchange, computePerformance, ...dto }: FetchOrdersDto): Promise<{ orders: Order[]; performance?: OrderPerformance }> {
+  async fetchOrders({
+    pair,
+    exchange,
+    computePerformance,
+    ...dto
+  }: FetchOrdersDto): Promise<{
+    orders: Order[];
+    performance?: OrderPerformance;
+  }> {
     const exchangeId = exchange || 'binance';
 
     // Convert date strings to timestamps
@@ -74,15 +82,17 @@ export class ApiOrdersService {
         if (!orderTime) return true; // Include if no timestamp
         const orderTimestamp =
           typeof orderTime === 'number'
-          ? orderTime
-          : new Date(orderTime).getTime();
+            ? orderTime
+            : new Date(orderTime).getTime();
         return orderTimestamp <= until;
       });
     }
 
     return {
       orders,
-      performance: computePerformance ? this.computePerformance(orders) : undefined,
+      performance: computePerformance
+        ? this.computePerformance(orders)
+        : undefined,
     };
   }
 
@@ -127,9 +137,9 @@ export class ApiOrdersService {
 
       const filled = order.filled || 0;
       const price = order.price || 0;
-      const cost = order.cost || (filled * price);
-      
-      const remaining = order.remaining || (order.amount - filled);
+      const cost = order.cost || filled * price;
+
+      const remaining = order.remaining || order.amount - filled;
       const anticipatedVal = remaining * price;
 
       if (order.side === 'buy') {
@@ -150,25 +160,28 @@ export class ApiOrdersService {
     }
 
     const avgBuyPrice = totalBuyVolume > 0 ? totalBuyCost / totalBuyVolume : 0;
-    const avgSellPrice = totalSellVolume > 0 ? totalSellCost / totalSellVolume : 0;
+    const avgSellPrice =
+      totalSellVolume > 0 ? totalSellCost / totalSellVolume : 0;
 
     // Realized Profit
     // Cost of goods sold = avgBuyPrice * totalSellVolume
     const costOfGoodsSold = avgBuyPrice * totalSellVolume;
     const profit = totalSellCost - costOfGoodsSold - fees;
-    
+
     // Profit Percent (ROI on sold items)
-    const profitPercent = costOfGoodsSold > 0 ? (profit / costOfGoodsSold) * 100 : 0;
+    const profitPercent =
+      costOfGoodsSold > 0 ? (profit / costOfGoodsSold) * 100 : 0;
 
     // Anticipated Profit
     // We assume all open orders are executed at their limit price
     const finalBuyVolume = totalBuyVolume + anticipatedBuyVolume;
     const finalBuyCost = totalBuyCost + anticipatedBuyCost;
-    const finalAvgBuyPrice = finalBuyVolume > 0 ? finalBuyCost / finalBuyVolume : 0;
+    const finalAvgBuyPrice =
+      finalBuyVolume > 0 ? finalBuyCost / finalBuyVolume : 0;
 
     const finalSellVolume = totalSellVolume + anticipatedSellVolume;
     const finalSellCost = totalSellCost + anticipatedSellCost;
-    
+
     // Calculate anticipated profit based on final volumes
     // We use the final average buy price as the basis for the final sell volume
     const finalCostOfGoodsSold = finalAvgBuyPrice * finalSellVolume;

@@ -27,7 +27,9 @@ export class ApiOrderController {
     description: 'Orders retrieved successfully',
     type: Object,
   })
-  async fetchOrders(@Body() dto: FetchOrdersDto): Promise<{ orders: Order[]; performance?: OrderPerformance }> {
+  async fetchOrders(
+    @Body() dto: FetchOrdersDto,
+  ): Promise<{ orders: Order[]; performance?: OrderPerformance }> {
     return await this.apiOrdersService.fetchOrders(dto);
   }
 }

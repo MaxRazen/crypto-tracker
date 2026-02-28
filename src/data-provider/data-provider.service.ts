@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { Subject, Observable, Subscription } from 'rxjs';
 import {
   KlineEvent,
@@ -7,6 +7,7 @@ import {
 } from './data-provider.types';
 import { BinanceWsService } from './binance-ws.service';
 import { MarketDataService } from './market-data.service';
+import modeConfig, { ModeConfig } from '../config/mode.config';
 
 /**
  * DataProviderService manages exchange data streams.
@@ -32,6 +33,8 @@ export class DataProviderService implements OnModuleDestroy {
   constructor(
     private readonly binanceWsService: BinanceWsService,
     private readonly marketDataService: MarketDataService,
+    @Inject(modeConfig.KEY)
+    private readonly modeConfig: ModeConfig,
   ) {}
 
   onModuleDestroy() {
@@ -42,8 +45,14 @@ export class DataProviderService implements OnModuleDestroy {
   /**
    * Initialize data streams for the given subscriptions.
    * Seeds historical data then connects the WebSocket pipeline.
+   * In idle mode: no WebSocket subscription is established.
    */
   async initialize(subscriptions: SubscriptionInfo[]): Promise<void> {
+    if (this.modeConfig.isIdleMode) {
+      this.logger.log('Idle mode: skipping WebSocket subscription');
+      return;
+    }
+
     this.subscriptions.clear();
     for (const sub of subscriptions) {
       this.subscriptions.set(sub.pair, sub);
@@ -71,11 +80,10 @@ export class DataProviderService implements OnModuleDestroy {
     return this.marketUpdate$.asObservable();
   }
 
-  // ─── private ─────────────────────────────────────────────
-
   private teardown(): void {
     this.wsSub?.unsubscribe();
     this.wsSub = null;
+    this.binanceWsService.updateStreams([]);
   }
 
   private async seedAllHistoricalData(): Promise<void> {

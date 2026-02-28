@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PositionEntity } from './position.entity';
+import { PositionEntity } from './entities/position.entity';
 
 export interface Position {
   pair: string;

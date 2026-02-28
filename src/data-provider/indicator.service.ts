@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import talib = require('talib');
+import talib from 'talib';
 import { Candle, ParsedIndicator } from './data-provider.types';
 
 /**

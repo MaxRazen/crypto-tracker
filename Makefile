@@ -8,5 +8,5 @@ run:
 test:
 	yarn run test
 
-format:
+lint:
 	yarn run format

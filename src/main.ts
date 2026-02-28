@@ -18,7 +18,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Crypto Tracker API')
     .setDescription(
-      'API for cryptocurrency trading rule tracking and backtesting',
+      'API for cryptocurrency trading rule tracking',
     )
     .setVersion('1.0')
     .addBearerAuth(
@@ -32,7 +32,6 @@ async function bootstrap() {
     )
     .addTag('rules', 'Trading rule management')
     .addTag('orders', 'Order management and tracking')
-    .addTag('backtest', 'Backtesting functionality')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

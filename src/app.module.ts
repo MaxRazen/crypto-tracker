@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { TrackerModule } from './tracker/tracker.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RuleModule } from './rule/rule.module';
 import { OrderModule } from './order/order.module';
@@ -11,10 +10,10 @@ import { ExchangeModule } from './exchange/exchange.module';
 import { AppController } from './app.controller';
 import { ApiModule } from './api/api.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { OrderEntity } from './order/order.entity';
-import { RuleEntity } from './rule/rule.entity';
-import { PositionEntity } from './order/position.entity';
-import { PositionCooldownEntity } from './order/position-cooldown.entity';
+import { OrderEntity } from './order/entities/order.entity';
+import { RuleEntity } from './rule/entities/rule.entity';
+import { PositionEntity } from './order/entities/position.entity';
+import { PositionCooldownEntity } from './order/entities/position-cooldown.entity';
 import storageConfig from './storage/storage.config';
 import authConfig from './auth/auth.config';
 import { ConfigService } from '@nestjs/config';
@@ -52,7 +51,6 @@ import { RuleEngineModule } from './rule-engine/rule-engine.module';
       PositionCooldownEntity,
     ]),
     ScheduleModule.forRoot(),
-    TrackerModule,
     RuleModule,
     OrderModule,
     StorageModule,
@@ -62,7 +60,7 @@ import { RuleEngineModule } from './rule-engine/rule-engine.module';
     DataProviderModule,
     RuleEngineModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'packages', 'web', 'dist'),
+      rootPath: join(__dirname, '..', 'packages', 'web', 'dist'),
       serveRoot: '/',
       exclude: ['/api/{*any}', '/auth/{*any}'],
     }),
