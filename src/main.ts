@@ -28,8 +28,6 @@ async function bootstrap() {
       },
       'JWT-auth',
     )
-    .addTag('rules', 'Trading rule management')
-    .addTag('orders', 'Order management and tracking')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

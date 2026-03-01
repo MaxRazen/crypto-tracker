@@ -1,5 +1,6 @@
 # compiled output
 /dist
+*.tsbuildinfo
 /node_modules
 /packages/web/node_modules
 /packages/web/dist

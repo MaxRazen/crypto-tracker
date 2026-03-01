@@ -5,6 +5,8 @@ import orderConfig from './order.config';
 import modeConfig from '../config/mode.config';
 import { StorageModule } from '../storage/storage.module';
 import { OrderRepository } from './order.repository';
+import { PositionRepository } from './position.repository';
+import { PositionCooldownRepository } from './position-cooldown.repository';
 
 describe('OrderService', () => {
   let service: OrderService;
@@ -16,7 +18,12 @@ describe('OrderService', () => {
         ConfigModule.forFeature(modeConfig),
         StorageModule,
       ],
-      providers: [OrderRepository, OrderService],
+      providers: [
+        OrderRepository,
+        PositionRepository,
+        PositionCooldownRepository,
+        OrderService,
+      ],
     }).compile();
 
     service = module.get<OrderService>(OrderService);

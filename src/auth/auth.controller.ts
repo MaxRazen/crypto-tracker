@@ -17,7 +17,7 @@ class LoginDto {
 }
 
 @ApiTags('auth')
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(
     private readonly jwtService: JwtService,
