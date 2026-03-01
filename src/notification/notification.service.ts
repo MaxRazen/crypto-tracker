@@ -48,7 +48,21 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
     this.eventSub?.unsubscribe();
   }
 
-  async sendMarkdown(text: string): Promise<void> {
+  async notifyRuleTriggered(rule: Rule): Promise<void> {
+    const header = `*Rule \\#${this.escape(rule.uid)} ${this.escape(rule.pair)} Executed*`;
+
+    const body = rule.activators
+      .map((a) => {
+        const side = a.side === 'gte' ? '≥' : '≤';
+        const tf = a.timeframe || rule.timeframe;
+        return this.escape(`${a.type} ${side} ${a.value} [${tf}]`);
+      })
+      .join('\n');
+
+    await this.sendMarkdown(`${header}\n${body}`);
+  }
+
+  private async sendMarkdown(text: string): Promise<void> {
     if (this.mode.isPlaneMode) {
       this.logger.log(`[plane] ${text}`);
       return;
@@ -58,14 +72,12 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    const { botToken, chatId } = this.config.telegram;
-
-    if (!botToken || !chatId) {
-      this.logger.warn(
-        'Telegram credentials not configured — skipping notification',
-      );
+    if (!this.isConfigValid()) {
+      this.logger.warn('Telegram credentials not configured');
       return;
     }
+
+    const { botToken, chatId } = this.config.telegram;
 
     try {
       await firstValueFrom(
@@ -83,21 +95,13 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async notifyRuleTriggered(rule: Rule): Promise<void> {
-    const header = `*Rule \\#${this.escape(rule.uid)} ${this.escape(rule.pair)} Executed*`;
-
-    const body = rule.activators
-      .map((a) => {
-        const side = a.side === 'gte' ? '≥' : '≤';
-        const tf = a.timeframe || rule.timeframe;
-        return this.escape(`${a.type} ${side} ${a.value} [${tf}]`);
-      })
-      .join('\n');
-
-    await this.sendMarkdown(`${header}\n${body}`);
-  }
-
   private escape(text: string): string {
     return text.replace(/([_*[\]()~`>#+\-=|{}.!\\])/g, '\\$1');
+  }
+
+  private isConfigValid(): boolean {
+    return Boolean(
+      this.config.telegram.botToken && this.config.telegram.chatId,
+    );
   }
 }

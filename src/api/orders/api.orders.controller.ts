@@ -5,9 +5,9 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { ApiOrdersService, OrderPerformance } from './api.orders.service';
+import { ApiOrdersService } from './api.orders.service';
 import { FetchOrdersDto } from './dto/fetch-orders.dto';
-import { Order } from 'ccxt';
+import { FetchOrdersResponseDto } from './dto/fetch-orders.response.dto';
 
 @ApiTags('orders')
 @ApiBearerAuth('JWT-auth')
@@ -25,11 +25,9 @@ export class ApiOrderController {
   @ApiResponse({
     status: 200,
     description: 'Orders retrieved successfully',
-    type: Object,
+    type: FetchOrdersResponseDto,
   })
-  async fetchOrders(
-    @Body() dto: FetchOrdersDto,
-  ): Promise<{ orders: Order[]; performance?: OrderPerformance }> {
-    return await this.apiOrdersService.fetchOrders(dto);
+  async fetchOrders(@Body() dto: FetchOrdersDto) {
+    return this.apiOrdersService.fetchOrders(dto);
   }
 }
