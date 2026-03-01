@@ -5,9 +5,6 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "build": "yarn build:web && nest build",
     "build:web": "yarn workspace web build",
