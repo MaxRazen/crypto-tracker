@@ -44,11 +44,12 @@ export class AuthController {
     }
 
     const payload = { sub: authConfig.webUser, username: authConfig.webUser };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: authConfig.jwtExpiresIn,
+    });
 
     return {
       access_token: accessToken,
-      expires_in: 3600,
     };
   }
 }
