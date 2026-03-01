@@ -1,77 +1,109 @@
 <template>
-  <div class="modal-backdrop" @click.self="$emit('close')">
-    <div class="modal" style="max-width: 42rem">
-      <div class="modal-header">{{ isEdit ? 'Edit Rule' : 'Create Rule' }}</div>
-      <form @submit.prevent="submit" class="modal-body">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>UID</label>
+  <div
+    class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+    @click.self="$emit('close')"
+  >
+    <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg border border-design bg-card shadow-xl">
+      <div class="px-5 py-4 border-b border-design font-semibold text-lg text-header">
+        {{ isEdit ? 'Edit Rule' : 'Create Rule' }}
+      </div>
+      <form id="rule-form" @submit.prevent="submit" class="p-5">
+        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-secondary">UID</label>
             <div class="flex gap-2">
               <input
                 v-model="form.uid"
-                class="input"
+                class="flex-1 input-field"
                 placeholder="rule-btc-buy-low"
                 required
                 :readonly="isEdit"
-                style="flex: 1"
               />
               <button
                 v-if="!isEdit"
                 type="button"
-                class="btn btn-secondary btn-sm"
+                class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-secondary transition-colors"
                 @click="generateUid"
               >
                 Generate
               </button>
             </div>
-            <span v-if="isEdit" class="text-xs text-muted">Cannot change UID when editing</span>
+            <span v-if="isEdit" class="text-xs text-secondary">Cannot change UID when editing</span>
           </div>
-          <div class="form-group">
-            <label>Pair</label>
-            <select v-model="form.pair" class="input" required>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-secondary">Pair</label>
+            <select
+              v-model="form.pair"
+              class="w-full input-field"
+              required
+            >
               <option value="">Select pair</option>
               <option v-for="p in PAIRS" :key="p" :value="p">{{ p }}</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Market</label>
-            <select v-model="form.market" class="input" required>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-secondary">Market</label>
+            <select
+              v-model="form.market"
+              class="w-full input-field"
+              required
+            >
               <option v-for="m in MARKETS" :key="m" :value="m">{{ m }}</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Timeframe</label>
-            <select v-model="form.timeframe" class="input" required>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-secondary">Timeframe</label>
+            <select
+              v-model="form.timeframe"
+              class="w-full input-field"
+              required
+            >
               <option v-for="t in TIMEFRAMES" :key="t" :value="t">{{ t }}</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Fetch Type</label>
-            <input v-model="form.fetchType" class="input" placeholder="ticker" required />
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-secondary">Fetch Type</label>
+            <input
+              v-model="form.fetchType"
+              class="w-full input-field"
+              placeholder="ticker"
+              required
+            />
           </div>
-          <div class="form-group" v-if="isEdit">
-            <label class="flex items-center gap-2">
-              <input type="checkbox" v-model="form.active" />
+          <div v-if="isEdit" class="flex flex-col gap-1">
+            <label class="flex items-center gap-2 text-sm font-medium text-secondary">
+              <Toggle v-model="form.active" />
               Active
             </label>
           </div>
         </div>
 
-        <div class="form-group full-width mt-4">
-          <label>Activators</label>
+        <div class="flex flex-col gap-1 mt-4 sm:col-span-2">
+          <label class="text-sm font-medium text-secondary">Activators</label>
           <ActivatorsEditor v-model="form.activators" />
         </div>
 
-        <div class="form-group full-width mt-4">
-          <label>Actions</label>
+        <div class="flex flex-col gap-1 mt-4 sm:col-span-2">
+          <label class="text-sm font-medium text-secondary">Actions</label>
           <ActionsEditor v-model="form.actions" />
         </div>
 
-        <p v-if="formError" class="error mt-3">{{ formError }}</p>
+        <p v-if="formError" class="text-delete text-sm mt-3">{{ formError }}</p>
       </form>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" @click="$emit('close')">Cancel</button>
-        <button type="submit" class="btn btn-primary" :disabled="saving" @click="submit">
+      <div class="px-5 py-4 border-t border-design flex gap-2 justify-end">
+        <button
+          type="button"
+          class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded btn-secondary transition-colors"
+          @click="$emit('close')"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          form="rule-form"
+          class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded btn-brand disabled:opacity-50 transition-colors"
+          :disabled="saving"
+        >
           {{ saving ? 'Saving...' : (isEdit ? 'Update' : 'Create') }}
         </button>
       </div>
@@ -79,17 +111,18 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { PAIRS, MARKETS, TIMEFRAMES } from './constants';
 import ActivatorsEditor from './ActivatorsEditor.vue';
 import ActionsEditor from './ActionsEditor.vue';
+import Toggle from './Toggle.vue';
 
-const props = defineProps({
-  rule: { type: Object, default: null },
-});
+const props = defineProps<{
+  rule: Record<string, unknown> | null;
+}>();
 
-const emit = defineEmits(['save', 'close']);
+const emit = defineEmits<{ (e: 'save', rule: Record<string, unknown>): void; (e: 'close'): void }>();
 
 const isEdit = computed(() => !!props.rule?.uid);
 
@@ -100,14 +133,14 @@ const form = ref({
   market: 'binance',
   timeframe: '1h',
   fetchType: 'ticker',
-  activators: [],
-  actions: [],
+  activators: [] as Record<string, unknown>[],
+  actions: [] as Record<string, unknown>[],
 });
 
 const formError = ref('');
 const saving = ref(false);
 
-function normalizeActivator(a) {
+function normalizeActivator(a: Record<string, unknown>) {
   return {
     type: a.type || 'price',
     side: a.side || 'lte',
@@ -116,18 +149,18 @@ function normalizeActivator(a) {
   };
 }
 
-function normalizeAction(a) {
-  const base = { type: a.type || 'notification', context: a.context || {} };
-  if (['activate', 'deactivate'].includes(base.type)) {
-    base.context = { ruleUid: base.context.ruleUid || '' };
-  } else if (['buy', 'sell'].includes(base.type)) {
+function normalizeAction(a: Record<string, unknown>) {
+  const base = { type: a.type || 'notification', context: a.context || {} } as Record<string, unknown>;
+  if (['activate', 'deactivate'].includes(base.type as string)) {
+    base.context = { ruleUid: (base.context as Record<string, string>)?.ruleUid || '' };
+  } else if (['buy', 'sell'].includes(base.type as string)) {
     base.context = {
-      type: base.context.type || 'market',
-      price: base.context.price ?? '',
-      quantity: base.context.quantity || { type: 'percent', value: '50' },
+      type: (base.context as Record<string, string>)?.type || 'market',
+      price: (base.context as Record<string, string>)?.price ?? '',
+      quantity: (base.context as Record<string, unknown>)?.quantity || { type: 'percent', value: '50' },
     };
   } else {
-    base.context = { channel: base.context.channel || 'telegram' };
+    base.context = { channel: (base.context as Record<string, string>)?.channel || 'telegram' };
   }
   return base;
 }
@@ -137,14 +170,14 @@ watch(
   (r) => {
     if (r) {
       form.value = {
-        uid: r.uid,
-        active: r.active ?? true,
-        pair: r.pair,
-        market: r.market,
-        timeframe: r.timeframe,
-        fetchType: r.fetchType,
-        activators: (Array.isArray(r.activators) ? r.activators : []).map(normalizeActivator),
-        actions: (Array.isArray(r.actions) ? r.actions : []).map(normalizeAction),
+        uid: r.uid as string,
+        active: (r.active as boolean) ?? true,
+        pair: r.pair as string,
+        market: r.market as string,
+        timeframe: r.timeframe as string,
+        fetchType: r.fetchType as string,
+        activators: (Array.isArray(r.activators) ? r.activators : []).map((a) => normalizeActivator(a as Record<string, unknown>)),
+        actions: (Array.isArray(r.actions) ? r.actions : []).map((a) => normalizeAction(a as Record<string, unknown>)),
       };
     } else {
       form.value = {
@@ -179,7 +212,7 @@ async function submit() {
     formError.value = 'At least one action is required';
     return;
   }
-  const invalidActivator = form.value.activators.find((a) => !a.type || !a.value);
+  const invalidActivator = form.value.activators.find((a) => !(a as Record<string, unknown>).type || !(a as Record<string, unknown>).value);
   if (invalidActivator) {
     formError.value = 'All activators need type and value';
     return;
@@ -188,17 +221,10 @@ async function submit() {
   saving.value = true;
   try {
     await emit('save', { ...form.value });
-  } catch (e) {
-    formError.value = e.message || 'Save failed';
+  } catch (e: unknown) {
+    formError.value = (e as Error)?.message || 'Save failed';
   } finally {
     saving.value = false;
   }
 }
 </script>
-
-<style scoped>
-.error {
-  color: var(--danger);
-  font-size: 0.875rem;
-}
-</style>
