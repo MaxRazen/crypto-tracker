@@ -31,6 +31,17 @@
               >
                 Orders
               </button>
+              <button
+                :class="[
+                  'px-3 py-1.5 text-sm font-medium rounded transition-colors',
+                  currentView === 'tools'
+                    ? 'bg-active-menu text-default'
+                    : 'nav-btn-inactive',
+                ]"
+                @click="currentView = 'tools'"
+              >
+                Tools
+              </button>
             </nav>
           </div>
           <button
@@ -45,6 +56,7 @@
         <div class="w-full max-w-6xl mx-auto px-4 sm:px-6">
           <RulesView v-show="currentView === 'rules'" />
           <OrdersView v-show="currentView === 'orders'" />
+          <ToolsView v-show="currentView === 'tools'" />
         </div>
       </main>
     </template>
@@ -53,13 +65,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { api } from './api';
-import LoginView from './LoginView.vue';
-import RulesView from './RulesView.vue';
-import OrdersView from './OrdersView.vue';
+import { api } from './api/api';
+import LoginView from './Login/LoginView.vue';
+import RulesView from './Rules/RulesView.vue';
+import OrdersView from './Orders/OrdersView.vue';
+import ToolsView from './Tools/ToolsView.vue';
 
 const authenticated = ref(false);
-const currentView = ref<'rules' | 'orders'>('rules');
+const currentView = ref<'rules' | 'orders' | 'tools'>('rules');
 
 function checkAuth() {
   authenticated.value = api.isAuthenticated();

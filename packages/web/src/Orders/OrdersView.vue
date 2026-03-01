@@ -226,9 +226,9 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
-import { api } from './api';
-import type { FetchOrdersDto, FetchOrdersResponseDto } from './client/types.gen';
-import { PAIRS } from './constants';
+import { api } from '../api/api';
+import type { FetchOrdersDto, FetchOrdersResponseDto } from '../api/client/types.gen';
+import { PAIRS } from '../constants';
 
 function toLocalDatetimeString(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');

@@ -113,10 +113,10 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { PAIRS, MARKETS, TIMEFRAMES } from './constants';
+import { PAIRS, MARKETS, TIMEFRAMES } from '../constants';
 import ActivatorsEditor from './ActivatorsEditor.vue';
 import ActionsEditor from './ActionsEditor.vue';
-import Toggle from './Toggle.vue';
+import Toggle from '../components/Toggle.vue';
 
 const props = defineProps<{
   rule: Record<string, unknown> | null;

@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { INDICATOR_TYPES, SIDES, TIMEFRAMES } from './constants';
+import { INDICATOR_TYPES, SIDES, TIMEFRAMES } from '../constants';
 
 const props = defineProps<{
   modelValue: Array<Record<string, unknown>>;

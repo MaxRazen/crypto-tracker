@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { api } from './api';
+import { api } from '../api/api';
 
 const emit = defineEmits<{ (e: 'login'): void }>();
 

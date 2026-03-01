@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { ACTION_TYPES, ORDER_TYPES, QUANTITY_TYPES } from './constants';
+import { ACTION_TYPES, ORDER_TYPES, QUANTITY_TYPES } from '../constants';
 
 const props = defineProps<{
   modelValue: Array<Record<string, unknown>>;
