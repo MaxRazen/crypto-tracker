@@ -6,14 +6,11 @@ export type ModeConfig = {
   isLiveMode: boolean;
 };
 
-export default registerAs(
-  'mode',
-  (): ModeConfig => {
-    const mode = (process.env.MODE || 'idle').toLowerCase();
-    return {
-      isIdleMode: mode === 'idle',
-      isPlaneMode: mode === 'plane',
-      isLiveMode: mode === 'live',
-    };
-  },
-);
+export default registerAs('mode', (): ModeConfig => {
+  const mode = (process.env.MODE || 'idle').toLowerCase();
+  return {
+    isIdleMode: mode === 'idle',
+    isPlaneMode: mode === 'plane',
+    isLiveMode: mode === 'live',
+  };
+});

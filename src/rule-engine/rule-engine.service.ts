@@ -387,10 +387,7 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
    * Handle activate/deactivate actions inline: toggle the target rule.
    */
   private handleRuleActivation(
-    action: Extract<
-      RuleAction,
-      { type: 'activate' | 'deactivate' }
-    >,
+    action: Extract<RuleAction, { type: 'activate' | 'deactivate' }>,
   ): void {
     const targetUid = action.context.ruleUid;
     const activate = action.type === 'activate';

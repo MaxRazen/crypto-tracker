@@ -8,8 +8,8 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || true, // Allow all origins in dev, set specific origin in production
-    credentials: true, // Allow credentials (cookies, authorization headers)
+    origin: process.env.CORS_ORIGIN || true,
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
@@ -17,9 +17,7 @@ async function bootstrap() {
   // Setup Swagger/OpenAPI
   const config = new DocumentBuilder()
     .setTitle('Crypto Tracker API')
-    .setDescription(
-      'API for cryptocurrency trading rule tracking',
-    )
+    .setDescription('API for cryptocurrency trading rule tracking')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -28,7 +26,7 @@ async function bootstrap() {
         bearerFormat: 'JWT',
         description: 'Enter JWT token issued by external auth service',
       },
-      'JWT-auth', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+      'JWT-auth',
     )
     .addTag('rules', 'Trading rule management')
     .addTag('orders', 'Order management and tracking')
