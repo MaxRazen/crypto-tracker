@@ -20,6 +20,8 @@ import { ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { DataProviderModule } from './data-provider/data-provider.module';
 import { RuleEngineModule } from './rule-engine/rule-engine.module';
+import { NotificationModule } from './notification/notification.module';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -58,12 +60,15 @@ import { RuleEngineModule } from './rule-engine/rule-engine.module';
     ApiModule,
     AuthModule,
     DataProviderModule,
+    EventModule,
     RuleEngineModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'packages', 'web', 'dist'),
       serveRoot: '/',
       exclude: ['/api/{*any}', '/auth/{*any}'],
     }),
+    NotificationModule,
+    EventModule,
   ],
   controllers: [AppController],
 })

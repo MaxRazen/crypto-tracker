@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { Order, Quantity } from './order.types';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import orderConfig from './order.config';
@@ -8,13 +14,17 @@ import { OrderRepository } from './order.repository';
 import { ExchangeService } from '../exchange/exchange.service';
 import { PositionRepository } from './position.repository';
 import { Order as CCXTOrder } from 'ccxt';
+import { Subscription } from 'rxjs';
+import { EventService } from '../event/event.service';
+import { OrderActionEvent } from '../event/event.types';
 
 @Injectable()
-export class OrderService implements OnModuleInit {
+export class OrderService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(OrderService.name);
   private readonly DEFAULT_EXCHANGE_ID = 'binance';
-  private readonly TRACKING_INTERVAL_MS = 120000; // 2 minutes instead of 30 seconds
+  private readonly TRACKING_INTERVAL_MS = 120_000; // 2 minutes
   private lastTrackingTime: Map<string, number> = new Map();
+  private eventSub: Subscription | null = null;
 
   private orders: Order[] = [];
 
@@ -22,6 +32,7 @@ export class OrderService implements OnModuleInit {
     private orderRepository: OrderRepository,
     private exchangeService: ExchangeService,
     private positionRepository: PositionRepository,
+    private eventService: EventService,
 
     @Inject(orderConfig.KEY)
     private config: ConfigType<typeof orderConfig>,
@@ -34,6 +45,34 @@ export class OrderService implements OnModuleInit {
     this.logger.log(
       `Order service initialized with ${this.orders.length} active orders`,
     );
+
+    this.eventSub = this.eventService.onOrderAction$.subscribe({
+      next: (event) => {
+        this.placeOrder(this.toOrder(event)).catch((err) =>
+          this.logger.error(
+            `Failed to place order for rule ${event.rule.uid}: ${err.message}`,
+          ),
+        );
+      },
+      error: (err) =>
+        this.logger.error(`Order action event stream error: ${err.message}`),
+    });
+  }
+
+  onModuleDestroy() {
+    this.eventSub?.unsubscribe();
+  }
+
+  private toOrder(event: OrderActionEvent): Order {
+    return {
+      uid: `${event.rule.uid}-${event.action.type}-${event.timestamp}`,
+      pair: event.rule.pair,
+      price: event.action.context.price || String(event.price),
+      side: event.action.type,
+      type: event.action.context.type,
+      quantity: event.action.context.quantity,
+      actionId: `${event.rule.uid}-${event.action.type}`,
+    };
   }
 
   async placeOrder(dto: Order) {

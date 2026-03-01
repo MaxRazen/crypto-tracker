@@ -5,7 +5,7 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { Subject, Observable, Subscription, debounceTime } from 'rxjs';
+import { Subscription, debounceTime } from 'rxjs';
 import modeConfig, { ModeConfig } from '../config/mode.config';
 import {
   Rule,
@@ -19,17 +19,12 @@ import { RuleService } from '../rule/rule.service';
 import { DataProviderService } from '../data-provider/data-provider.service';
 import { MarketDataService } from '../data-provider/market-data.service';
 import { IndicatorService } from '../data-provider/indicator.service';
+import { EventService } from '../event/event.service';
 import {
   SubscriptionInfo,
   pairToWsSymbol,
 } from '../data-provider/data-provider.types';
-import {
-  ActivatorEvaluation,
-  RuleTriggeredEvent,
-  OrderActionEvent,
-  RuleActivationEvent,
-  NotificationActionEvent,
-} from './rule-engine.types';
+import { ActivatorEvaluation, RuleTriggeredEvent } from '../event/event.types';
 
 /**
  * RuleEngineService is the central orchestrator that bridges data and rules.
@@ -54,18 +49,12 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
   private marketSub: Subscription | null = null;
   private ruleChangeSub: Subscription | null = null;
 
-  // ─── action buses ────────────────────────────────────────
-
-  private readonly ruleTriggered$ = new Subject<RuleTriggeredEvent>();
-  private readonly orderAction$ = new Subject<OrderActionEvent>();
-  private readonly ruleActivation$ = new Subject<RuleActivationEvent>();
-  private readonly notificationAction$ = new Subject<NotificationActionEvent>();
-
   constructor(
     private readonly ruleService: RuleService,
     private readonly dataProviderService: DataProviderService,
     private readonly marketDataService: MarketDataService,
     private readonly indicatorService: IndicatorService,
+    private readonly eventService: EventService,
     @Inject(modeConfig.KEY)
     private readonly modeConfig: ModeConfig,
   ) {}
@@ -94,28 +83,6 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
   onModuleDestroy() {
     this.marketSub?.unsubscribe();
     this.ruleChangeSub?.unsubscribe();
-    this.ruleTriggered$.complete();
-    this.orderAction$.complete();
-    this.ruleActivation$.complete();
-    this.notificationAction$.complete();
-  }
-
-  // ─── public observables (consumers subscribe here) ──────
-
-  get onRuleTriggered$(): Observable<RuleTriggeredEvent> {
-    return this.ruleTriggered$.asObservable();
-  }
-
-  get onOrderAction$(): Observable<OrderActionEvent> {
-    return this.orderAction$.asObservable();
-  }
-
-  get onRuleActivation$(): Observable<RuleActivationEvent> {
-    return this.ruleActivation$.asObservable();
-  }
-
-  get onNotificationAction$(): Observable<NotificationActionEvent> {
-    return this.notificationAction$.asObservable();
   }
 
   getStats(): Record<string, number> {
@@ -287,7 +254,7 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
           timestamp,
         };
 
-        this.ruleTriggered$.next(event);
+        this.eventService.emitRuleTriggered(event);
 
         // Persist deactivation
         this.ruleService
@@ -373,12 +340,17 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
     }
     for (const action of rule.actions) {
       if (isOrderAction(action)) {
-        this.orderAction$.next({ rule, action, price, timestamp });
+        this.eventService.emitOrderAction({ rule, action, price, timestamp });
       } else if (isRuleActivationAction(action)) {
-        this.ruleActivation$.next({ rule, action, timestamp });
+        this.eventService.emitRuleActivation({ rule, action, timestamp });
         this.handleRuleActivation(action);
       } else if (isNotificationAction(action)) {
-        this.notificationAction$.next({ rule, action, price, timestamp });
+        this.eventService.emitNotificationAction({
+          rule,
+          action,
+          price,
+          timestamp,
+        });
       }
     }
   }
