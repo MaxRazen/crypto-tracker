@@ -25,7 +25,10 @@ export class ExchangeOrderDto {
   @ApiPropertyOptional({ description: 'Client order ID' })
   clientOrderId?: string;
 
-  @ApiProperty({ description: 'Order datetime (ISO string)', example: '2024-01-15T10:30:00.000Z' })
+  @ApiProperty({
+    description: 'Order datetime (ISO string)',
+    example: '2024-01-15T10:30:00.000Z',
+  })
   datetime: string;
 
   @ApiProperty({ description: 'Order timestamp (ms)', example: 1705312200000 })
@@ -47,13 +50,21 @@ export class ExchangeOrderDto {
   @ApiProperty({ description: 'Trading pair (symbol)', example: 'BTC/USDT' })
   symbol: string;
 
-  @ApiProperty({ description: 'Order type', enum: ['market', 'limit'], example: 'limit' })
+  @ApiProperty({
+    description: 'Order type',
+    enum: ['market', 'limit'],
+    example: 'limit',
+  })
   type: string;
 
   @ApiPropertyOptional({ description: 'Time in force' })
   timeInForce?: string;
 
-  @ApiProperty({ description: 'Order side', enum: ['buy', 'sell'], example: 'buy' })
+  @ApiProperty({
+    description: 'Order side',
+    enum: ['buy', 'sell'],
+    example: 'buy',
+  })
   side: string;
 
   @ApiProperty({ description: 'Order price', example: 50000 })
@@ -103,13 +114,19 @@ export class OrderPerformanceDto {
   @ApiProperty({ description: 'Realized profit', example: 125.5 })
   profit: number;
 
-  @ApiProperty({ description: 'Anticipated profit (including open orders)', example: 150.0 })
+  @ApiProperty({
+    description: 'Anticipated profit (including open orders)',
+    example: 150.0,
+  })
   anticipatedProfit: number;
 
   @ApiProperty({ description: 'Total fees paid', example: 0.5 })
   fees: number;
 
-  @ApiProperty({ description: 'Total orders (excluding cancelled)', example: 10 })
+  @ApiProperty({
+    description: 'Total orders (excluding cancelled)',
+    example: 10,
+  })
   totalOrders: number;
 
   @ApiProperty({ description: 'Cancelled orders count', example: 2 })

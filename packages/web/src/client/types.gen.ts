@@ -27,6 +27,172 @@ export type FetchOrdersDto = {
     computePerformance?: boolean;
 };
 
+export type OrderFeeDto = {
+    /**
+     * Fee currency
+     */
+    currency?: string;
+    /**
+     * Fee cost
+     */
+    cost?: number;
+    /**
+     * Fee rate
+     */
+    rate?: number;
+};
+
+export type ExchangeOrderDto = {
+    /**
+     * Exchange order ID
+     */
+    id: string;
+    /**
+     * Client order ID
+     */
+    clientOrderId?: string;
+    /**
+     * Order datetime (ISO string)
+     */
+    datetime: string;
+    /**
+     * Order timestamp (ms)
+     */
+    timestamp: number;
+    /**
+     * Last trade timestamp
+     */
+    lastTradeTimestamp?: number;
+    /**
+     * Last update timestamp
+     */
+    lastUpdateTimestamp?: number;
+    /**
+     * Order status
+     */
+    status: 'open' | 'closed' | 'canceled' | 'expired' | 'rejected' | 'new';
+    /**
+     * Trading pair (symbol)
+     */
+    symbol: string;
+    /**
+     * Order type
+     */
+    type: 'market' | 'limit';
+    /**
+     * Time in force
+     */
+    timeInForce?: string;
+    /**
+     * Order side
+     */
+    side: 'buy' | 'sell';
+    /**
+     * Order price
+     */
+    price: number;
+    /**
+     * Average fill price
+     */
+    average?: number;
+    /**
+     * Order amount
+     */
+    amount: number;
+    /**
+     * Filled amount
+     */
+    filled: number;
+    /**
+     * Remaining amount
+     */
+    remaining: number;
+    /**
+     * Stop price
+     */
+    stopPrice?: number;
+    /**
+     * Trigger price
+     */
+    triggerPrice?: number;
+    /**
+     * Total cost (filled * price)
+     */
+    cost: number;
+    /**
+     * Order fee
+     */
+    fee?: OrderFeeDto;
+    /**
+     * Reduce only flag
+     */
+    reduceOnly?: boolean;
+    /**
+     * Post only flag
+     */
+    postOnly?: boolean;
+    /**
+     * Raw exchange response
+     */
+    info?: {
+        [key: string]: unknown;
+    };
+};
+
+export type OrderPerformanceDto = {
+    /**
+     * Profit percentage (ROI)
+     */
+    profitPercent: number;
+    /**
+     * Realized profit
+     */
+    profit: number;
+    /**
+     * Anticipated profit (including open orders)
+     */
+    anticipatedProfit: number;
+    /**
+     * Total fees paid
+     */
+    fees: number;
+    /**
+     * Total orders (excluding cancelled)
+     */
+    totalOrders: number;
+    /**
+     * Cancelled orders count
+     */
+    cancelledOrders: number;
+    /**
+     * Active/open orders count
+     */
+    activeOrders: number;
+    /**
+     * Average buy price
+     */
+    avgBuyPrice: number;
+    /**
+     * Average sell price
+     */
+    avgSellPrice: number;
+    /**
+     * Total volume (buy + sell)
+     */
+    volume: number;
+};
+
+export type FetchOrdersResponseDto = {
+    /**
+     * Orders retrieved from the exchange
+     */
+    orders: Array<ExchangeOrderDto>;
+    /**
+     * Performance metrics (when computePerformance=true)
+     */
+    performance?: OrderPerformanceDto;
+};
+
 export type CreateRuleDto = {
     /**
      * Unique identifier for the rule
@@ -127,9 +293,7 @@ export type ApiOrderControllerFetchOrdersResponses = {
     /**
      * Orders retrieved successfully
      */
-    200: {
-        [key: string]: unknown;
-    };
+    200: FetchOrdersResponseDto;
 };
 
 export type ApiOrderControllerFetchOrdersResponse = ApiOrderControllerFetchOrdersResponses[keyof ApiOrderControllerFetchOrdersResponses];

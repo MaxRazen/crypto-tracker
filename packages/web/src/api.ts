@@ -1,5 +1,6 @@
 import {
   authControllerLogin,
+  apiOrderControllerFetchOrders,
   apiRulesControllerCreate,
   apiRulesControllerFindAll,
   apiRulesControllerFindOne,
@@ -7,7 +8,7 @@ import {
   apiRulesControllerUpdate,
 } from './client';
 import { createClient } from './client/client';
-import type { CreateRuleDto, UpdateRuleDto } from './client/types.gen';
+import type { CreateRuleDto, FetchOrdersDto, FetchOrdersResponseDto, UpdateRuleDto } from './client/types.gen';
 
 const TOKEN_KEY = 'access_token';
 
@@ -65,6 +66,12 @@ export const api = {
 
   isAuthenticated(): boolean {
     return !!getToken();
+  },
+
+  orders: {
+    async fetch(dto: FetchOrdersDto): Promise<FetchOrdersResponseDto> {
+      return apiOrderControllerFetchOrders({ client, body: dto }) as unknown as Promise<FetchOrdersResponseDto>;
+    },
   },
 
   rules: {
