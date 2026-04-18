@@ -17,23 +17,22 @@
       </div>
       <div class="flex flex-col gap-1">
         <label class="text-sm font-medium text-secondary">Type</label>
-        <select
-          v-model="item.type"
-          class="w-full input-field"
-          @change="ensureContext(item)"
-        >
+        <select v-model="item.type" class="w-full input-field" @change="ensureContext(item)">
           <option v-for="t in ACTION_TYPES" :key="t" :value="t">{{ t }}</option>
         </select>
       </div>
 
       <!-- Activate / Deactivate -->
-      <div v-if="['activate', 'deactivate'].includes(String(item.type)) && item.context" class="flex flex-col gap-1 mt-2">
+      <div
+        v-if="['activate', 'deactivate'].includes(String(item.type)) && item.context"
+        class="flex flex-col gap-1 mt-2"
+      >
         <label class="text-sm font-medium text-secondary">Rule UID</label>
         <input
           v-model="(item.context as Record<string, string>).ruleUid"
           class="w-full input-field"
           placeholder="rule-xxx"
-        />
+        >
       </div>
 
       <!-- Buy / Sell -->
@@ -54,16 +53,16 @@
               v-model="(item.context as Record<string, string>).price"
               class="w-full input-field"
               placeholder="50000"
-            />
+            >
           </div>
         </div>
-        <div v-if="(item.context as Record<string, unknown>)?.quantity" class="grid gap-4 grid-cols-1 sm:grid-cols-2 mt-2">
+        <div
+          v-if="(item.context as Record<string, unknown>)?.quantity"
+          class="grid gap-4 grid-cols-1 sm:grid-cols-2 mt-2"
+        >
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium text-secondary">Quantity Type</label>
-            <select
-              v-model="(item.context as any).quantity.type"
-              class="w-full input-field"
-            >
+            <select v-model="(item.context as any).quantity.type" class="w-full input-field">
               <option v-for="t in QUANTITY_TYPES" :key="t" :value="t">{{ t }}</option>
             </select>
           </div>
@@ -73,19 +72,22 @@
               v-model="(item.context as any).quantity.value"
               class="w-full input-field"
               placeholder="50"
-            />
+            >
           </div>
         </div>
       </template>
 
       <!-- Notification / Alert -->
-      <div v-if="['notification', 'alert'].includes(String(item.type))" class="flex flex-col gap-1 mt-2">
+      <div
+        v-if="['notification', 'alert'].includes(String(item.type))"
+        class="flex flex-col gap-1 mt-2"
+      >
         <label class="text-sm font-medium text-secondary">Channel</label>
         <input
           v-model="(item.context as Record<string, string>).channel"
           class="w-full input-field"
           placeholder="telegram"
-        />
+        >
       </div>
     </div>
     <button
@@ -105,7 +107,7 @@ const props = defineProps<{
   modelValue: Array<Record<string, unknown>>;
 }>();
 
-const emit = defineEmits<{ (e: 'update:modelValue', value: Array<Record<string, unknown>>): void }>();
+const emit = defineEmits<(e: 'update:modelValue', value: Array<Record<string, unknown>>) => void>();
 
 function ensureContext(item: Record<string, unknown>) {
   if (!item.context || typeof item.context !== 'object') {

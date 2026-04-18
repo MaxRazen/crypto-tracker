@@ -1,4 +1,9 @@
-import type { CreateRuleDto, FetchOrdersDto, FetchOrdersResponseDto, UpdateRuleDto } from './gen/types.gen';
+import type {
+  CreateRuleDto,
+  FetchOrdersDto,
+  FetchOrdersResponseDto,
+  UpdateRuleDto,
+} from './gen/types.gen';
 
 const TOKEN_KEY = 'access_token';
 
@@ -20,7 +25,9 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
   const response = await fetch(url, { ...options, headers });
 

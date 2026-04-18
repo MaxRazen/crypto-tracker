@@ -12,7 +12,10 @@
 
     <div v-if="loading" class="text-secondary p-4 text-center">Loading rules...</div>
     <div v-else-if="error" class="text-delete p-4">{{ error }}</div>
-    <div v-else-if="rules.length === 0" class="rounded-lg border border-design bg-card p-4 text-center text-secondary">
+    <div
+      v-else-if="rules.length === 0"
+      class="rounded-lg border border-design bg-card p-4 text-center text-secondary"
+    >
       No rules yet. Create one to get started.
     </div>
     <div v-else>
@@ -35,7 +38,8 @@
             </span>
           </div>
           <div class="text-sm text-secondary mb-3">
-            {{ rule.pair }} · {{ rule.market }} · {{ rule.timeframe }}
+            {{ rule.pair }}
+            · {{ rule.market }} · {{ rule.timeframe }}
           </div>
           <div class="flex gap-2 flex-wrap">
             <button
@@ -72,17 +76,47 @@
         <table class="w-full text-sm border-collapse">
           <thead>
             <tr>
-              <th class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design">UID</th>
-              <th class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design">Pair</th>
-              <th class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design">Market</th>
-              <th class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design">Status</th>
-              <th class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design">Timeframe</th>
-              <th class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design">Actions</th>
+              <th
+                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
+              >
+                UID
+              </th>
+              <th
+                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
+              >
+                Pair
+              </th>
+              <th
+                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
+              >
+                Market
+              </th>
+              <th
+                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
+              >
+                Status
+              </th>
+              <th
+                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
+              >
+                Timeframe
+              </th>
+              <th
+                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
+              >
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="rule in rules" :key="rule.uid" class="border-b border-design table-row-hover">
-              <td class="px-4 py-3"><span class="font-medium text-default">{{ rule.uid }}</span></td>
+            <tr
+              v-for="rule in rules"
+              :key="rule.uid"
+              class="border-b border-design table-row-hover"
+            >
+              <td class="px-4 py-3">
+                <span class="font-medium text-default">{{ rule.uid }}</span>
+              </td>
               <td class="px-4 py-3 text-default">{{ rule.pair }}</td>
               <td class="px-4 py-3 text-default">{{ rule.market }}</td>
               <td class="px-4 py-3">
@@ -132,22 +166,22 @@
       </div>
     </div>
 
-    <RuleFormModal
-      v-if="showModal"
-      :rule="editingRule"
-      @save="handleSave"
-      @close="closeModal"
-    />
+    <RuleFormModal v-if="showModal" :rule="editingRule" @save="handleSave" @close="closeModal" />
 
     <div
       v-if="deleteTarget"
       class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
       @click.self="deleteTarget = null"
     >
-      <div class="w-full max-w-md rounded-lg border border-design bg-card overflow-hidden shadow-xl">
-        <div class="px-5 py-4 border-b border-design font-semibold text-lg text-header">Delete Rule</div>
+      <div
+        class="w-full max-w-md rounded-lg border border-design bg-card overflow-hidden shadow-xl"
+      >
+        <div class="px-5 py-4 border-b border-design font-semibold text-lg text-header">
+          Delete Rule
+        </div>
         <div class="p-5 text-default">
-          Are you sure you want to delete <strong>{{ deleteTarget?.uid }}</strong>? This cannot be undone.
+          Are you sure you want to delete <strong>{{ deleteTarget?.uid }}</strong>? This cannot be
+          undone.
         </div>
         <div class="px-5 py-4 border-t border-design flex gap-2 justify-end">
           <button
@@ -212,18 +246,14 @@ function closeModal() {
 }
 
 async function handleSave(rule) {
-  try {
-    if (editingRule.value?.uid) {
-      const { uid, ...payload } = rule;
-      await api.rules.update(uid, payload);
-    } else {
-      await api.rules.create(rule);
-    }
-    closeModal();
-    await fetchRules();
-  } catch (e) {
-    throw e;
+  if (editingRule.value?.uid) {
+    const { uid, ...payload } = rule;
+    await api.rules.update(uid, payload);
+  } else {
+    await api.rules.create(rule);
   }
+  closeModal();
+  await fetchRules();
 }
 
 async function activate(rule) {
@@ -261,4 +291,3 @@ async function doDelete() {
 
 onMounted(fetchRules);
 </script>
-

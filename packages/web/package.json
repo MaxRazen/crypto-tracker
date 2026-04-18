@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "openapi-ts": "openapi-ts"
+    "lint": "yarn biome lint --write",
+    "format": "yarn biome format --write"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.1",
@@ -15,6 +16,7 @@
     "vue": "^3.5.13"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.12",
     "@hey-api/openapi-ts": "0.93.1",
     "@hey-api/vite-plugin": "0.3.0",
     "@vitejs/plugin-vue": "^5.2.1",

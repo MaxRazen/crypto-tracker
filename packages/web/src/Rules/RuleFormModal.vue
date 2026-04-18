@@ -3,7 +3,9 @@
     class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
     @click.self="$emit('close')"
   >
-    <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg border border-design bg-card shadow-xl">
+    <div
+      class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg border border-design bg-card shadow-xl"
+    >
       <div class="px-5 py-4 border-b border-design font-semibold text-lg text-header">
         {{ isEdit ? 'Edit Rule' : 'Create Rule' }}
       </div>
@@ -18,7 +20,7 @@
                 placeholder="rule-btc-buy-low"
                 required
                 :readonly="isEdit"
-              />
+              >
               <button
                 v-if="!isEdit"
                 type="button"
@@ -32,32 +34,20 @@
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium text-secondary">Pair</label>
-            <select
-              v-model="form.pair"
-              class="w-full input-field"
-              required
-            >
+            <select v-model="form.pair" class="w-full input-field" required>
               <option value="">Select pair</option>
               <option v-for="p in PAIRS" :key="p" :value="p">{{ p }}</option>
             </select>
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium text-secondary">Market</label>
-            <select
-              v-model="form.market"
-              class="w-full input-field"
-              required
-            >
+            <select v-model="form.market" class="w-full input-field" required>
               <option v-for="m in MARKETS" :key="m" :value="m">{{ m }}</option>
             </select>
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium text-secondary">Timeframe</label>
-            <select
-              v-model="form.timeframe"
-              class="w-full input-field"
-              required
-            >
+            <select v-model="form.timeframe" class="w-full input-field" required>
               <option v-for="t in TIMEFRAMES" :key="t" :value="t">{{ t }}</option>
             </select>
           </div>
@@ -68,7 +58,7 @@
               class="w-full input-field"
               placeholder="ticker"
               required
-            />
+            >
           </div>
           <div v-if="isEdit" class="flex flex-col gap-1">
             <label class="flex items-center gap-2 text-sm font-medium text-secondary">
@@ -122,7 +112,10 @@ const props = defineProps<{
   rule: Record<string, unknown> | null;
 }>();
 
-const emit = defineEmits<{ (e: 'save', rule: Record<string, unknown>): void; (e: 'close'): void }>();
+const emit = defineEmits<{
+  (e: 'save', rule: Record<string, unknown>): void;
+  (e: 'close'): void;
+}>();
 
 const isEdit = computed(() => !!props.rule?.uid);
 
@@ -150,14 +143,20 @@ function normalizeActivator(a: Record<string, unknown>) {
 }
 
 function normalizeAction(a: Record<string, unknown>) {
-  const base = { type: a.type || 'notification', context: a.context || {} } as Record<string, unknown>;
+  const base = { type: a.type || 'notification', context: a.context || {} } as Record<
+    string,
+    unknown
+  >;
   if (['activate', 'deactivate'].includes(base.type as string)) {
     base.context = { ruleUid: (base.context as Record<string, string>)?.ruleUid || '' };
   } else if (['buy', 'sell'].includes(base.type as string)) {
     base.context = {
       type: (base.context as Record<string, string>)?.type || 'market',
       price: (base.context as Record<string, string>)?.price ?? '',
-      quantity: (base.context as Record<string, unknown>)?.quantity || { type: 'percent', value: '50' },
+      quantity: (base.context as Record<string, unknown>)?.quantity || {
+        type: 'percent',
+        value: '50',
+      },
     };
   } else {
     base.context = { channel: (base.context as Record<string, string>)?.channel || 'telegram' };
@@ -176,8 +175,12 @@ watch(
         market: r.market as string,
         timeframe: r.timeframe as string,
         fetchType: r.fetchType as string,
-        activators: (Array.isArray(r.activators) ? r.activators : []).map((a) => normalizeActivator(a as Record<string, unknown>)),
-        actions: (Array.isArray(r.actions) ? r.actions : []).map((a) => normalizeAction(a as Record<string, unknown>)),
+        activators: (Array.isArray(r.activators) ? r.activators : []).map((a) =>
+          normalizeActivator(a as Record<string, unknown>),
+        ),
+        actions: (Array.isArray(r.actions) ? r.actions : []).map((a) =>
+          normalizeAction(a as Record<string, unknown>),
+        ),
       };
     } else {
       form.value = {
@@ -193,7 +196,7 @@ watch(
     }
     formError.value = '';
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function generateUid() {
@@ -212,7 +215,9 @@ async function submit() {
     formError.value = 'At least one action is required';
     return;
   }
-  const invalidActivator = form.value.activators.find((a) => !(a as Record<string, unknown>).type || !(a as Record<string, unknown>).value);
+  const invalidActivator = form.value.activators.find(
+    (a) => !(a as Record<string, unknown>).type || !(a as Record<string, unknown>).value,
+  );
   if (invalidActivator) {
     formError.value = 'All activators need type and value';
     return;

@@ -8,7 +8,7 @@
         class="toggle-input"
         :disabled="disabled"
         @change="$emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
-      />
+      >
       <div class="toggle-track" />
       <div class="toggle-thumb" />
     </div>
@@ -21,7 +21,7 @@ defineProps<{
   disabled?: boolean;
 }>();
 
-defineEmits<{ (e: 'update:modelValue', value: boolean): void }>();
+defineEmits<(e: 'update:modelValue', value: boolean) => void>();
 </script>
 
 <style scoped>

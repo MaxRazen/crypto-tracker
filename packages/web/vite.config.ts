@@ -14,9 +14,7 @@ export default defineConfig({
           path: 'src/api/gen',
           postProcess: ['biome:format'],
         },
-        plugins: [
-          '@hey-api/typescript',
-        ],
+        plugins: ['@hey-api/typescript'],
       },
     }),
   ],

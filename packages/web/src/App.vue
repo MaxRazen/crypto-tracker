@@ -1,8 +1,6 @@
 <template>
   <div>
-    <template v-if="!authenticated">
-      <LoginView @login="handleLogin" />
-    </template>
+    <template v-if="!authenticated"> <LoginView @login="handleLogin" /> </template>
     <template v-else>
       <header class="py-4 border-b border-design bg-semi-dark">
         <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between">

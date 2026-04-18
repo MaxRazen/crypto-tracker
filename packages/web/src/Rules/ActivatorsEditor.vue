@@ -18,37 +18,23 @@
       <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-secondary">Type</label>
-          <select
-            v-model="item.type"
-            class="w-full input-field"
-          >
+          <select v-model="item.type" class="w-full input-field">
             <option v-for="t in INDICATOR_TYPES" :key="t" :value="t">{{ t }}</option>
           </select>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-secondary">Side</label>
-          <select
-            v-model="item.side"
-            class="w-full input-field"
-          >
+          <select v-model="item.side" class="w-full input-field">
             <option v-for="s in SIDES" :key="s" :value="s">{{ s }}</option>
           </select>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-secondary">Value</label>
-          <input
-            v-model="item.value"
-            class="w-full input-field"
-            placeholder="50000"
-            type="text"
-          />
+          <input v-model="item.value" class="w-full input-field" placeholder="50000" type="text">
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-secondary">Timeframe</label>
-          <select
-            v-model="item.timeframe"
-            class="w-full input-field"
-          >
+          <select v-model="item.timeframe" class="w-full input-field">
             <option v-for="t in TIMEFRAMES" :key="t" :value="t">{{ t }}</option>
           </select>
         </div>
@@ -71,7 +57,7 @@ const props = defineProps<{
   modelValue: Array<Record<string, unknown>>;
 }>();
 
-const emit = defineEmits<{ (e: 'update:modelValue', value: Array<Record<string, unknown>>): void }>();
+const emit = defineEmits<(e: 'update:modelValue', value: Array<Record<string, unknown>>) => void>();
 
 function add() {
   emit('update:modelValue', [

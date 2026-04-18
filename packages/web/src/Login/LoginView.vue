@@ -14,7 +14,7 @@
             placeholder="Username"
             required
             autocomplete="off"
-          />
+          >
         </div>
         <div class="flex flex-col gap-1 mb-4">
           <label for="password" class="text-sm font-medium text-secondary">Password</label>
@@ -26,7 +26,7 @@
             placeholder="Password"
             required
             autocomplete="current-password"
-          />
+          >
         </div>
         <p v-if="error" class="text-delete text-sm mb-3">{{ error }}</p>
         <button
@@ -45,7 +45,7 @@
 import { ref } from 'vue';
 import { api } from '../api/api';
 
-const emit = defineEmits<{ (e: 'login'): void }>();
+const emit = defineEmits<(e: 'login') => void>();
 
 const username = ref('');
 const password = ref('');
