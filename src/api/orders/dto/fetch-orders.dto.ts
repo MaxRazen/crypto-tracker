@@ -1,5 +1,20 @@
-import { IsOptional, IsString, IsDateString, IsBoolean } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsDateString,
+  IsBoolean,
+  IsArray,
+  IsIn,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+
+export const CCXT_ORDER_STATUSES = [
+  'open',
+  'closed',
+  'canceled',
+  'expired',
+  'rejected',
+] as const;
 
 export class FetchOrdersDto {
   @ApiPropertyOptional({
@@ -40,7 +55,18 @@ export class FetchOrdersDto {
   exchange?: string;
 
   @ApiPropertyOptional({
-    description: 'Compute performance',
+    description: 'Filter by one or more exchange order statuses',
+    example: ['open', 'closed'],
+    enum: CCXT_ORDER_STATUSES,
+    isArray: true,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsIn(CCXT_ORDER_STATUSES, { each: true })
+  status?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Compute performance metrics',
     example: true,
     default: false,
   })

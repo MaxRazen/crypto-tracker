@@ -45,6 +45,12 @@ export class OrderEntity {
   @Column({ nullable: true, type: 'text' })
   actionId?: string;
 
+  @Column({ nullable: true, type: 'real' })
+  filledQuantity?: number;
+
+  @Column({ nullable: true, type: 'bigint' })
+  completedAt?: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

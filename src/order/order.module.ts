@@ -8,27 +8,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderEntity } from './entities/order.entity';
 import { ExchangeModule } from '../exchange/exchange.module';
 import { PositionEntity } from './entities/position.entity';
-import { PositionCooldownEntity } from './entities/position-cooldown.entity';
 import { PositionRepository } from './position.repository';
-import { PositionCooldownRepository } from './position-cooldown.repository';
 
 @Module({
   imports: [
     ConfigModule.forFeature(orderConfig),
     ConfigModule.forFeature(modeConfig),
-    TypeOrmModule.forFeature([
-      OrderEntity,
-      PositionEntity,
-      PositionCooldownEntity,
-    ]),
+    TypeOrmModule.forFeature([OrderEntity, PositionEntity]),
     ExchangeModule,
   ],
-  providers: [
-    OrderRepository,
-    PositionRepository,
-    PositionCooldownRepository,
-    OrderService,
-  ],
-  exports: [OrderService, PositionRepository, PositionCooldownRepository],
+  providers: [OrderRepository, PositionRepository, OrderService],
+  exports: [OrderService, PositionRepository],
 })
 export class OrderModule {}

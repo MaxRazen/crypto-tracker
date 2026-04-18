@@ -1,8 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, In, Like, Repository } from 'typeorm';
 import { OrderEntity } from './entities/order.entity';
 import { Order } from './order.types';
+
+export interface OrderFilters {
+  since?: number;
+  until?: number;
+  status?: Order['status'] | Order['status'][];
+  pair?: string;
+  ruleId?: string;
+}
 
 @Injectable()
 export class OrderRepository {
@@ -19,9 +27,30 @@ export class OrderRepository {
     return entities.map((entity) => this.entityToOrder(entity));
   }
 
-  async findByActionId(actionId: string): Promise<Order | null> {
+  async findByFilters(filters: OrderFilters): Promise<Order[]> {
+    const where: Record<string, unknown> = {};
+
+    if (filters.pair) where.pair = filters.pair;
+
+    if (filters.ruleId) where.actionId = Like(`${filters.ruleId}-%`);
+
+    if (filters.status) {
+      where.status = Array.isArray(filters.status)
+        ? In(filters.status)
+        : filters.status;
+    }
+
+    if (filters.since !== undefined || filters.until !== undefined) {
+      where.placedAt = Between(filters.since ?? 0, filters.until ?? Date.now());
+    }
+
+    const entities = await this.repository.find({ where });
+    return entities.map((entity) => this.entityToOrder(entity));
+  }
+
+  async findActiveByActionId(actionId: string): Promise<Order | null> {
     const entity = await this.repository.findOne({
-      where: { actionId },
+      where: { actionId, status: In(['new', 'pending']) },
     });
     return entity ? this.entityToOrder(entity) : null;
   }
@@ -50,6 +79,8 @@ export class OrderRepository {
     entity.errorMessage = order.errorMessage;
     entity.externalUid = order.externalUid;
     entity.actionId = order.actionId;
+    entity.filledQuantity = order.filledQuantity;
+    entity.completedAt = order.completedAt;
     return entity;
   }
 
@@ -67,6 +98,8 @@ export class OrderRepository {
       errorMessage: entity.errorMessage,
       externalUid: entity.externalUid,
       actionId: entity.actionId,
+      filledQuantity: entity.filledQuantity,
+      completedAt: entity.completedAt,
     };
   }
 }

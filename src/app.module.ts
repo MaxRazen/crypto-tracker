@@ -12,7 +12,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderEntity } from './order/entities/order.entity';
 import { RuleEntity } from './rule/entities/rule.entity';
 import { PositionEntity } from './order/entities/position.entity';
-import { PositionCooldownEntity } from './order/entities/position-cooldown.entity';
 import authConfig from './auth/auth.config';
 import { ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
@@ -34,23 +33,12 @@ import storageConfig from './config/storage.config';
         type: 'sqlite',
         database:
           configService.get<string>('storage.DB_URL') || '.data/db.sqlite',
-        entities: [
-          OrderEntity,
-          RuleEntity,
-          PositionEntity,
-          PositionCooldownEntity,
-        ],
+        entities: [OrderEntity, RuleEntity, PositionEntity],
         synchronize: true, // Set to false in production and use migrations
         logging: false,
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([
-      OrderEntity,
-      RuleEntity,
-      PositionEntity,
-      PositionCooldownEntity,
-    ]),
     ScheduleModule.forRoot(),
     RuleModule,
     OrderModule,
@@ -58,7 +46,6 @@ import storageConfig from './config/storage.config';
     ApiModule,
     AuthModule,
     DataProviderModule,
-    EventModule,
     RuleEngineModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'packages', 'web', 'dist'),

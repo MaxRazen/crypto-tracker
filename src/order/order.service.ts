@@ -22,7 +22,7 @@ import { OrderActionEvent } from '../event/event.types';
 export class OrderService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(OrderService.name);
   private readonly DEFAULT_EXCHANGE_ID = 'binance';
-  private readonly TRACKING_INTERVAL_MS = 120_000; // 2 minutes
+  private readonly TRACKING_INTERVAL_MS = 60_000;
   private lastTrackingTime: Map<string, number> = new Map();
   private eventSub: Subscription | null = null;
 
@@ -83,9 +83,8 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    // Check idempotency: if actionId exists, check if order with same actionId already exists
     if (dto.actionId) {
-      const existingOrder = await this.orderRepository.findByActionId(
+      const existingOrder = await this.orderRepository.findActiveByActionId(
         dto.actionId,
       );
       if (existingOrder) {
@@ -96,23 +95,25 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    // Also check by UID (backward compatibility)
     if (this.orders.some((o) => o.uid === dto.uid)) {
       this.logger.warn(`Order UID:${dto.uid} has been already placed`);
       return;
     }
 
-    this.orders.push({
+    const order: Order = {
       ...dto,
       status: 'new',
-      placedAt: new Date().getTime(),
-    });
+      placedAt: Date.now(),
+    };
 
-    await this.orderRepository.create(this.orders[this.orders.length - 1]);
-
+    this.orders.push(order);
+    await this.orderRepository.create(order);
     this.logger.log(
       `Order UID:${dto.uid} placed${dto.actionId ? ` with actionId: ${dto.actionId}` : ''}`,
     );
+
+    // Submit immediately; cron acts as recovery for orders persisted but not yet submitted
+    await this.submitOrder(order);
   }
 
   @Cron(CronExpression.EVERY_MINUTE, {
@@ -121,12 +122,14 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
   })
   async orderProcessor() {
     const now = Date.now();
+    // Snapshot to avoid mutation issues when removing terminal orders mid-loop
+    const snapshot = [...this.orders];
 
-    for (const order of this.orders) {
+    for (const order of snapshot) {
       if (order.status === 'new') {
+        // Recovery path: submit orders that survived a crash before submitOrder ran
         await this.submitOrder(order);
       } else if (order.status === 'pending') {
-        // Optimize tracking: only check if enough time has passed
         const lastCheck = this.lastTrackingTime.get(order.uid) || 0;
         if (now - lastCheck >= this.TRACKING_INTERVAL_MS) {
           await this.trackOrder(order);
@@ -134,7 +137,6 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
         }
       }
 
-      // Remove completed/cancelled orders from memory
       if (
         order.status === 'completed' ||
         order.status === 'cancelled' ||
@@ -150,7 +152,6 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
     try {
       this.logger.log(`Submitting order UID:${order.uid}`);
 
-      // Calculate available quantity based on balance
       const quantity = await this.calculateQuantity(order);
 
       if (quantity <= 0) {
@@ -165,17 +166,15 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
 
       const symbol = this.normalizeSymbol(order.pair);
       const side = order.side;
-      const amount = quantity;
 
       let submittedOrder: CCXTOrder;
 
-      // Submit order using CCXT ExchangeService
       if (order.type === 'market') {
         submittedOrder = await this.exchangeService.createMarketOrder(
           this.DEFAULT_EXCHANGE_ID,
           symbol,
           side,
-          amount,
+          quantity,
         );
       } else {
         const price = parseFloat(order.price);
@@ -183,24 +182,19 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
           this.DEFAULT_EXCHANGE_ID,
           symbol,
           side,
-          amount,
+          quantity,
           price,
         );
       }
 
       this.logger.debug('Submitted order', submittedOrder);
 
-      // Update order with exchange response
       order.externalUid = submittedOrder.id?.toString();
       order.status = 'pending';
-      order.submittedAt = new Date().getTime();
+      order.submittedAt = Date.now();
 
       await this.orderRepository.update(order);
-
-      this.logger.log(
-        `Order UID:${order.uid} submitted to exchange`,
-        submittedOrder,
-      );
+      this.logger.log(`Order UID:${order.uid} submitted to exchange`);
     } catch (error) {
       order.status = 'failed';
       order.errorMessage = error.message;
@@ -227,26 +221,36 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
 
       this.logger.debug(`Track order UID:${order.uid}`, submittedOrder);
 
-      // Update order based on exchange status
-      if (submittedOrder.status === 'closed' || submittedOrder.filled > 0) {
-        // Order is filled or closed
+      const isClosed =
+        submittedOrder.status === 'closed' ||
+        submittedOrder.status === 'filled';
+      const isCancelled = ['canceled', 'rejected', 'expired'].includes(
+        submittedOrder.status,
+      );
+
+      if (isClosed) {
         order.status = 'completed';
-
-        // Manage positions
+        order.completedAt = Date.now();
+        order.filledQuantity = submittedOrder.filled;
         await this.handleOrderCompletion(order, submittedOrder);
-
         await this.orderRepository.update(order);
-        this.logger.log(`Order UID:${order.uid} completed`, submittedOrder);
-      } else if (
-        submittedOrder.status === 'canceled' ||
-        submittedOrder.status === 'rejected' ||
-        submittedOrder.status === 'expired'
-      ) {
+        this.logger.log(`Order UID:${order.uid} completed`);
+      } else if (isCancelled) {
         order.status = 'cancelled';
+        order.completedAt = Date.now();
         await this.orderRepository.update(order);
         this.logger.log(
           `Order UID:${order.uid} cancelled/rejected on exchange`,
-          submittedOrder,
+        );
+      } else if (
+        submittedOrder.filled > 0 &&
+        submittedOrder.filled !== (order.filledQuantity ?? 0)
+      ) {
+        // Partial fill: track progress but keep pending
+        order.filledQuantity = submittedOrder.filled;
+        await this.orderRepository.update(order);
+        this.logger.log(
+          `Order UID:${order.uid} partially filled: ${submittedOrder.filled}`,
         );
       }
     } catch (error) {
@@ -257,16 +261,12 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  /**
-   * Handle position management when order completes
-   */
   private async handleOrderCompletion(
     order: Order,
     ccxtOrder: CCXTOrder,
   ): Promise<void> {
     try {
       if (order.side === 'buy') {
-        // Create or update buy position
         const existingPosition = await this.positionRepository.findOpenPosition(
           order.pair,
         );
@@ -275,7 +275,6 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
         const averagePrice = ccxtOrder.average || parseFloat(order.price);
 
         if (existingPosition) {
-          // Update existing position (average price calculation)
           const totalQuantity = existingPosition.quantity + filledAmount;
           const totalValue =
             existingPosition.quantity * existingPosition.averagePrice +
@@ -287,7 +286,6 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
             averagePrice: newAveragePrice,
           });
         } else {
-          // Create new position
           await this.positionRepository.create({
             pair: order.pair,
             side: 'buy',
@@ -300,13 +298,21 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
           });
         }
       } else if (order.side === 'sell') {
-        // Close buy position
         const openPosition = await this.positionRepository.findOpenPosition(
           order.pair,
         );
 
         if (openPosition && openPosition.side === 'buy') {
-          await this.positionRepository.closePosition(order.pair, Date.now());
+          const filledAmount = ccxtOrder.filled || 0;
+          if (filledAmount <= 0) return;
+
+          if (filledAmount >= openPosition.quantity) {
+            await this.positionRepository.closePosition(order.pair, Date.now());
+          } else {
+            await this.positionRepository.updatePosition(order.pair, {
+              quantity: openPosition.quantity - filledAmount,
+            });
+          }
         }
       }
     } catch (error) {
@@ -321,45 +327,28 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
     const symbol = this.normalizeSymbol(order.pair);
     const [baseAsset, quoteAsset] = this.extractAssetsFromPair(order.pair);
 
-    // Get balance using CCXT
     const balances = await this.exchangeService.getBalance(
       this.DEFAULT_EXCHANGE_ID,
     );
 
-    // CCXT balance structure: balances[asset] = { free, used, total }
     const balanceInfo =
       order.side === 'buy' ? balances[quoteAsset] : balances[baseAsset];
-
     const balance = balanceInfo?.free || 0;
 
     if (balance <= 0) {
       return 0;
     }
 
-    let availableBalance: number;
-
-    if (order.side === 'buy') {
-      availableBalance = Math.min(balance, this.config.stake);
-    } else {
-      // For sell: use 100% of balance to handle dust
-      // Check if quantity is "100%" or similar
-      if (
-        order.quantity.type === 'percent' &&
-        parseFloat(order.quantity.value) >= 99
-      ) {
-        availableBalance = balance; // Sell all available
-      } else {
-        availableBalance = balance;
-      }
-    }
+    const availableBalance =
+      order.side === 'buy' ? Math.min(balance, this.config.stake) : balance;
 
     const desiredQuantity = this.calculateDesiredQuantity(
       order.quantity,
       availableBalance,
       parseFloat(order.price),
+      order.side,
     );
 
-    // Get market info for lot size validation
     try {
       const exchange = this.exchangeService.getExchange(
         this.DEFAULT_EXCHANGE_ID,
@@ -376,7 +365,6 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
           return 0;
         }
 
-        // Round to precision
         return (
           Math.floor(desiredQuantity * Math.pow(10, precision)) /
           Math.pow(10, precision)
@@ -391,25 +379,31 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
     return desiredQuantity;
   }
 
-  private calculateDesiredQuantity(
+  // Not private: pure function, tested directly
+  calculateDesiredQuantity(
     quantity: Quantity,
     balance: number,
     price: number,
+    side: 'buy' | 'sell',
   ): number {
     if (quantity.type !== 'percent') {
       return parseFloat(quantity.value);
     }
-    return ((balance / price) * parseFloat(quantity.value)) / 100;
+    const pct = parseFloat(quantity.value) / 100;
+    if (side === 'buy') {
+      // balance is quote currency; convert to base units via price
+      return (balance / price) * pct;
+    }
+    // balance is base currency; sell a fraction directly
+    return balance * pct;
   }
 
   private extractAssetsFromPair(pair: string): string[] {
     return pair.split('-');
   }
 
-  /**
-   * Normalize symbol format (e.g., BTC-USDT -> BTC/USDT for CCXT)
-   */
-  private normalizeSymbol(pair: string): string {
-    return pair.replace('-', '/');
+  // Not private: pure function, tested directly
+  normalizeSymbol(pair: string): string {
+    return pair.replace(/-/g, '/');
   }
 }

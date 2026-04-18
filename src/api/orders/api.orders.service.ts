@@ -2,6 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ExchangeService } from '../../exchange/exchange.service';
 import { Order } from 'ccxt';
 import { FetchOrdersDto } from './dto/fetch-orders.dto';
+import { OrderRepository } from '../../order/order.repository';
+import { PositionRepository } from '../../order/position.repository';
+import { ListLocalOrdersDto } from './dto/list-local-orders.dto';
+import {
+  ListLocalOrdersResponseDto,
+  LocalOrderDto,
+  LocalPositionDto,
+} from './dto/list-local-orders.response.dto';
 
 export interface OrderPerformance {
   profitPercent: number;
@@ -20,7 +28,11 @@ export interface OrderPerformance {
 export class ApiOrdersService {
   private readonly logger = new Logger(ApiOrdersService.name);
 
-  constructor(private readonly exchangeService: ExchangeService) {}
+  constructor(
+    private readonly exchangeService: ExchangeService,
+    private readonly orderRepository: OrderRepository,
+    private readonly positionRepository: PositionRepository,
+  ) {}
 
   /**
    * Sanitize symbol format (CCXT uses standard format like BTC/USDT)
@@ -79,13 +91,18 @@ export class ApiOrdersService {
     if (until) {
       orders = orders.filter((order) => {
         const orderTime = order.timestamp || order.datetime;
-        if (!orderTime) return true; // Include if no timestamp
+        if (!orderTime) return true;
         const orderTimestamp =
           typeof orderTime === 'number'
             ? orderTime
             : new Date(orderTime).getTime();
         return orderTimestamp <= until;
       });
+    }
+
+    // Filter by status if provided (client-side; not all exchanges support it server-side)
+    if (dto.status?.length) {
+      orders = orders.filter((order) => dto.status!.includes(order.status));
     }
 
     return {
@@ -200,6 +217,55 @@ export class ApiOrdersService {
       avgBuyPrice: Number(avgBuyPrice.toFixed(8)),
       avgSellPrice: Number(avgSellPrice.toFixed(8)),
       volume: Number(volume.toFixed(8)),
+    };
+  }
+
+  async listLocalOrders(
+    dto: ListLocalOrdersDto,
+  ): Promise<ListLocalOrdersResponseDto> {
+    const [orders, positions] = await Promise.all([
+      this.orderRepository.findByFilters({
+        since: dto.since,
+        until: dto.until,
+        pair: dto.pair,
+        ruleId: dto.ruleId,
+        status: dto.status as any,
+      }),
+      this.positionRepository.findOpenPositions(),
+    ]);
+
+    return {
+      orders: orders.map(
+        (o): LocalOrderDto => ({
+          uid: o.uid,
+          pair: o.pair,
+          side: o.side,
+          type: o.type,
+          price: o.price,
+          quantity: o.quantity,
+          status: o.status ?? 'new',
+          externalUid: o.externalUid,
+          actionId: o.actionId,
+          filledQuantity: o.filledQuantity,
+          placedAt: o.placedAt,
+          submittedAt: o.submittedAt,
+          completedAt: o.completedAt,
+          errorMessage: o.errorMessage,
+        }),
+      ),
+      positions: positions.map(
+        (p): LocalPositionDto => ({
+          pair: p.pair,
+          side: p.side,
+          quantity: p.quantity,
+          averagePrice: p.averagePrice,
+          orderUid: p.orderUid,
+          actionId: p.actionId,
+          openedAt: p.openedAt,
+          closedAt: p.closedAt,
+          isOpen: p.isOpen,
+        }),
+      ),
     };
   }
 }

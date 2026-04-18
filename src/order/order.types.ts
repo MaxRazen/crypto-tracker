@@ -17,4 +17,6 @@ export type Order = {
   errorMessage?: string;
   externalUid?: string;
   actionId?: string;
+  filledQuantity?: number;
+  completedAt?: number;
 };
