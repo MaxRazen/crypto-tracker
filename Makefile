@@ -10,4 +10,4 @@ test:
 
 lint:
 	yarn run format
-	cd packages/web && yarn run format && yarn run lint
+	cd web && yarn run format && yarn run lint

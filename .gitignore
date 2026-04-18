@@ -2,8 +2,8 @@
 /dist
 *.tsbuildinfo
 /node_modules
-/packages/web/node_modules
-/packages/web/dist
+/web/node_modules
+/web/dist
 /build
 
 # Logs

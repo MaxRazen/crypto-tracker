@@ -48,7 +48,7 @@ import storageConfig from './config/storage.config';
     DataProviderModule,
     RuleEngineModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'packages', 'web', 'dist'),
+      rootPath: join(__dirname, '..', 'web', 'dist'),
       serveRoot: '/',
       exclude: ['/api/{*any}', '/auth/{*any}'],
     }),

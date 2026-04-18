@@ -14,7 +14,7 @@
 
 ## WebUI
 
-The WebUI is a Vue 3 SPA in `packages/web`, served by NestJS in production.
+The WebUI is a Vue 3 SPA in `web`, served by NestJS in production.
 
 ### Development
 
