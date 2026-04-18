@@ -1,14 +1,4 @@
-import {
-  authControllerLogin,
-  apiOrderControllerFetchOrders,
-  apiRulesControllerCreate,
-  apiRulesControllerFindAll,
-  apiRulesControllerFindOne,
-  apiRulesControllerRemove,
-  apiRulesControllerUpdate,
-} from './client';
-import { createClient } from './client/client';
-import type { CreateRuleDto, FetchOrdersDto, FetchOrdersResponseDto, UpdateRuleDto } from './client/types.gen';
+import type { CreateRuleDto, FetchOrdersDto, FetchOrdersResponseDto, UpdateRuleDto } from './gen/types.gen';
 
 const TOKEN_KEY = 'access_token';
 
@@ -24,38 +14,39 @@ function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-const client = createClient({
-  baseUrl: '',
-  auth: () => getToken() ?? undefined,
-  responseStyle: 'data',
-  throwOnError: true,
-});
+async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
 
-client.interceptors.response.use(async (response, _request, _opts) => {
+  const response = await fetch(url, { ...options, headers });
+
   if (response.status === 401) {
     clearToken();
+    if (url !== '/api/auth/login') {
+      window.location.reload();
+    }
     throw new Error('UNAUTHORIZED');
   }
-  return response;
-});
 
-client.interceptors.error.use(async (error, response) => {
-  if (response?.status === 401) {
-    clearToken();
-    throw new Error('UNAUTHORIZED');
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body?.message ?? `HTTP ${response.status}`);
   }
-  if (error && typeof error === 'object' && 'message' in error) {
-    throw new Error((error as { message: string }).message);
-  }
-  throw error;
-});
+
+  if (response.status === 204) return undefined as T;
+  return response.json() as Promise<T>;
+}
 
 export const api = {
   async login(username: string, password: string) {
-    const data = (await authControllerLogin({
-      client,
-      body: { username, password },
-    })) as unknown as { access_token: string };
+    const data = await request<{ access_token: string }>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    });
     setToken(data.access_token);
     return data;
   },
@@ -69,26 +60,26 @@ export const api = {
   },
 
   orders: {
-    async fetch(dto: FetchOrdersDto): Promise<FetchOrdersResponseDto> {
-      return apiOrderControllerFetchOrders({ client, body: dto }) as unknown as Promise<FetchOrdersResponseDto>;
+    fetch(dto: FetchOrdersDto): Promise<FetchOrdersResponseDto> {
+      return request('/api/orders', { method: 'POST', body: JSON.stringify(dto) });
     },
   },
 
   rules: {
-    async list() {
-      return apiRulesControllerFindAll({ client }) as unknown as Promise<Array<Record<string, unknown>>>;
+    list(): Promise<Array<Record<string, unknown>>> {
+      return request('/api/rules');
     },
-    async get(uid: string) {
-      return apiRulesControllerFindOne({ client, path: { uid } });
+    get(uid: string): Promise<unknown> {
+      return request(`/api/rules/${uid}`);
     },
-    async create(rule: CreateRuleDto) {
-      return apiRulesControllerCreate({ client, body: rule });
+    create(rule: CreateRuleDto): Promise<unknown> {
+      return request('/api/rules', { method: 'POST', body: JSON.stringify(rule) });
     },
-    async update(uid: string, rule: UpdateRuleDto) {
-      return apiRulesControllerUpdate({ client, path: { uid }, body: rule });
+    update(uid: string, rule: UpdateRuleDto): Promise<unknown> {
+      return request(`/api/rules/${uid}`, { method: 'PATCH', body: JSON.stringify(rule) });
     },
-    async delete(uid: string) {
-      return apiRulesControllerRemove({ client, path: { uid } });
+    delete(uid: string): Promise<void> {
+      return request(`/api/rules/${uid}`, { method: 'DELETE' });
     },
   },
 };

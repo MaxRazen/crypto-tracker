@@ -227,7 +227,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { api } from '../api/api';
-import type { FetchOrdersDto, FetchOrdersResponseDto } from '../api/client/types.gen';
+import type { FetchOrdersDto, FetchOrdersResponseDto } from '../api/gen/types.gen';
 import { PAIRS } from '../constants';
 
 function toLocalDatetimeString(date: Date): string {
