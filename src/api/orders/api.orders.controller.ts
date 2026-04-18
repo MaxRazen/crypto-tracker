@@ -14,10 +14,10 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { ApiOrdersService } from './api.orders.service';
-import { FetchOrdersDto } from './dto/fetch-orders.dto';
-import { FetchOrdersResponseDto } from './dto/fetch-orders.response.dto';
-import { ListLocalOrdersDto } from './dto/list-local-orders.dto';
-import { ListLocalOrdersResponseDto } from './dto/list-local-orders.response.dto';
+import { ListExchangeOrdersDto } from './dto/list-exchange-orders.dto';
+import { ListExchangeOrdersResponseDto } from './dto/list-exchange-orders.response.dto';
+import { ListInternalOrdersDto } from './dto/list-local-orders.dto';
+import { ListInternalOrdersResponseDto } from './dto/list-local-orders.response.dto';
 
 @ApiTags('orders')
 @ApiBearerAuth('JWT-auth')
@@ -25,7 +25,7 @@ import { ListLocalOrdersResponseDto } from './dto/list-local-orders.response.dto
 export class ApiOrderController {
   constructor(private readonly apiOrdersService: ApiOrdersService) {}
 
-  @Post()
+  @Post('exchange/list')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Fetch orders from exchange',
@@ -35,13 +35,13 @@ export class ApiOrderController {
   @ApiResponse({
     status: 200,
     description: 'Orders retrieved successfully',
-    type: FetchOrdersResponseDto,
+    type: ListExchangeOrdersResponseDto,
   })
-  async fetchOrders(@Body() dto: FetchOrdersDto) {
-    return this.apiOrdersService.fetchOrders(dto);
+  async listExchangeOrders(@Body() dto: ListExchangeOrdersDto) {
+    return this.apiOrdersService.listExchangeOrders(dto);
   }
 
-  @Get('local')
+  @Get('internal/list')
   @ApiOperation({
     summary: 'List orders and positions from local DB',
     description:
@@ -50,9 +50,9 @@ export class ApiOrderController {
   @ApiResponse({
     status: 200,
     description: 'Local orders and positions retrieved successfully',
-    type: ListLocalOrdersResponseDto,
+    type: ListInternalOrdersResponseDto,
   })
-  async listLocalOrders(@Query() dto: ListLocalOrdersDto) {
-    return this.apiOrdersService.listLocalOrders(dto);
+  async listInternalOrders(@Query() dto: ListInternalOrdersDto) {
+    return this.apiOrdersService.listInternalOrders(dto);
   }
 }

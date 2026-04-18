@@ -16,7 +16,7 @@ export const CCXT_ORDER_STATUSES = [
   'rejected',
 ] as const;
 
-export class FetchOrdersDto {
+export class ListExchangeOrdersDto {
   @ApiPropertyOptional({
     description: 'Start date for fetching orders (ISO date string)',
     example: '2024-01-01T00:00:00Z',

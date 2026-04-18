@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 /**
  * Fee structure from CCXT exchange order
  */
-export class OrderFeeDto {
+export class ExchangeOrderFeeDto {
   @ApiPropertyOptional({ description: 'Fee currency', example: 'USDT' })
   currency?: string;
 
@@ -91,8 +91,8 @@ export class ExchangeOrderDto {
   @ApiProperty({ description: 'Total cost (filled * price)', example: 50 })
   cost: number;
 
-  @ApiPropertyOptional({ description: 'Order fee', type: OrderFeeDto })
-  fee?: OrderFeeDto;
+  @ApiPropertyOptional({ description: 'Order fee', type: ExchangeOrderFeeDto })
+  fee?: ExchangeOrderFeeDto;
 
   @ApiPropertyOptional({ description: 'Reduce only flag' })
   reduceOnly?: boolean;
@@ -107,7 +107,7 @@ export class ExchangeOrderDto {
 /**
  * Order performance metrics (when computePerformance=true)
  */
-export class OrderPerformanceDto {
+export class ExchangeOrderPerformanceDto {
   @ApiProperty({ description: 'Profit percentage (ROI)', example: 5.25 })
   profitPercent: number;
 
@@ -148,7 +148,7 @@ export class OrderPerformanceDto {
 /**
  * Response for fetch orders endpoint
  */
-export class FetchOrdersResponseDto {
+export class ListExchangeOrdersResponseDto {
   @ApiProperty({
     description: 'Orders retrieved from the exchange',
     type: [ExchangeOrderDto],
@@ -157,7 +157,7 @@ export class FetchOrdersResponseDto {
 
   @ApiPropertyOptional({
     description: 'Performance metrics (when computePerformance=true)',
-    type: OrderPerformanceDto,
+    type: ExchangeOrderPerformanceDto,
   })
-  performance?: OrderPerformanceDto;
+  performance?: ExchangeOrderPerformanceDto;
 }

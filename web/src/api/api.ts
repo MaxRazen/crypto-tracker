@@ -1,7 +1,7 @@
 import type {
   CreateRuleDto,
-  FetchOrdersDto,
-  FetchOrdersResponseDto,
+  FetchExchangeOrdersDto,
+  FetchExchangeOrdersResponseDto,
   UpdateRuleDto,
 } from './gen/types.gen';
 
@@ -67,8 +67,8 @@ export const api = {
   },
 
   orders: {
-    fetch(dto: FetchOrdersDto): Promise<FetchOrdersResponseDto> {
-      return request('/api/orders', { method: 'POST', body: JSON.stringify(dto) });
+    exchangeOrdersList(dto: FetchExchangeOrdersDto): Promise<FetchExchangeOrdersResponseDto> {
+      return request('/api/orders/exchange/list', { method: 'POST', body: JSON.stringify(dto) });
     },
   },
 

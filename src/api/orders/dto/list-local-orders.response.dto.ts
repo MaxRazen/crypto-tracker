@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class LocalQuantityDto {
+export class InternalQuantityDto {
   @ApiProperty({ enum: ['fixed', 'percent'], example: 'percent' })
   type: 'fixed' | 'percent';
 
@@ -8,7 +8,7 @@ export class LocalQuantityDto {
   value: string;
 }
 
-export class LocalOrderDto {
+export class InternalOrderDto {
   @ApiProperty({
     description: 'Internal order UID',
     example: 'rule001-buy-1700000000000',
@@ -27,8 +27,8 @@ export class LocalOrderDto {
   @ApiProperty({ example: '150.50' })
   price: string;
 
-  @ApiProperty({ type: LocalQuantityDto })
-  quantity: LocalQuantityDto;
+  @ApiProperty({ type: InternalQuantityDto })
+  quantity: InternalQuantityDto;
 
   @ApiProperty({
     enum: ['new', 'pending', 'completed', 'cancelled', 'failed'],
@@ -76,7 +76,7 @@ export class LocalOrderDto {
   errorMessage?: string;
 }
 
-export class LocalPositionDto {
+export class InternalPositionDto {
   @ApiProperty({ example: 'SOL-USDT' })
   pair: string;
 
@@ -117,10 +117,10 @@ export class LocalPositionDto {
   isOpen: boolean;
 }
 
-export class ListLocalOrdersResponseDto {
-  @ApiProperty({ type: [LocalOrderDto] })
-  orders: LocalOrderDto[];
+export class ListInternalOrdersResponseDto {
+  @ApiProperty({ type: [InternalOrderDto] })
+  orders: InternalOrderDto[];
 
-  @ApiProperty({ type: [LocalPositionDto] })
-  positions: LocalPositionDto[];
+  @ApiProperty({ type: [InternalPositionDto] })
+  positions: InternalPositionDto[];
 }

@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ExchangeService } from '../../exchange/exchange.service';
-import { Order } from 'ccxt';
-import { FetchOrdersDto } from './dto/fetch-orders.dto';
+import { Order as ExchangeOrder } from 'ccxt';
+import { ListExchangeOrdersDto } from './dto/list-exchange-orders.dto';
 import { OrderRepository } from '../../order/order.repository';
 import { PositionRepository } from '../../order/position.repository';
-import { ListLocalOrdersDto } from './dto/list-local-orders.dto';
+import { ListInternalOrdersDto } from './dto/list-local-orders.dto';
 import {
-  ListLocalOrdersResponseDto,
-  LocalOrderDto,
-  LocalPositionDto,
+  ListInternalOrdersResponseDto,
+  InternalOrderDto,
+  InternalPositionDto,
 } from './dto/list-local-orders.response.dto';
 
 export interface OrderPerformance {
@@ -54,16 +54,13 @@ export class ApiOrdersService {
     return upper.includes('/') ? upper : pair.toUpperCase();
   }
 
-  /**
-   * Fetch orders with filters
-   */
-  async fetchOrders({
+  async listExchangeOrders({
     pair,
     exchange,
     computePerformance,
     ...dto
-  }: FetchOrdersDto): Promise<{
-    orders: Order[];
+  }: ListExchangeOrdersDto): Promise<{
+    orders: ExchangeOrder[];
     performance?: OrderPerformance;
   }> {
     const exchangeId = exchange || 'binance';
@@ -76,7 +73,7 @@ export class ApiOrdersService {
     const symbol = pair ? this.sanitizeSymbol(pair) : undefined;
 
     // Fetch orders from the exchange
-    let orders: Order[] = [];
+    let orders: ExchangeOrder[] = [];
     try {
       orders = await this.exchangeService.getOrders(exchangeId, symbol, since);
     } catch (error) {
@@ -113,7 +110,7 @@ export class ApiOrdersService {
     };
   }
 
-  private computePerformance(orders: Order[]): OrderPerformance {
+  private computePerformance(orders: ExchangeOrder[]): OrderPerformance {
     let totalBuyVolume = 0;
     let totalBuyCost = 0;
     let totalSellVolume = 0;
@@ -220,9 +217,9 @@ export class ApiOrdersService {
     };
   }
 
-  async listLocalOrders(
-    dto: ListLocalOrdersDto,
-  ): Promise<ListLocalOrdersResponseDto> {
+  async listInternalOrders(
+    dto: ListInternalOrdersDto,
+  ): Promise<ListInternalOrdersResponseDto> {
     const [orders, positions] = await Promise.all([
       this.orderRepository.findByFilters({
         since: dto.since,
@@ -236,7 +233,7 @@ export class ApiOrdersService {
 
     return {
       orders: orders.map(
-        (o): LocalOrderDto => ({
+        (o): InternalOrderDto => ({
           uid: o.uid,
           pair: o.pair,
           side: o.side,
@@ -254,7 +251,7 @@ export class ApiOrdersService {
         }),
       ),
       positions: positions.map(
-        (p): LocalPositionDto => ({
+        (p): InternalPositionDto => ({
           pair: p.pair,
           side: p.side,
           quantity: p.quantity,

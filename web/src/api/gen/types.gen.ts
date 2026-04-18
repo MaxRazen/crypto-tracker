@@ -4,7 +4,7 @@ export type ClientOptions = {
     baseUrl: string;
 };
 
-export type FetchOrdersDto = {
+export type ListExchangeOrdersDto = {
     /**
      * Start date for fetching orders (ISO date string)
      */
@@ -31,7 +31,7 @@ export type FetchOrdersDto = {
     computePerformance?: boolean;
 };
 
-export type OrderFeeDto = {
+export type ExchangeOrderFeeDto = {
     /**
      * Fee currency
      */
@@ -126,7 +126,7 @@ export type ExchangeOrderDto = {
     /**
      * Order fee
      */
-    fee?: OrderFeeDto;
+    fee?: ExchangeOrderFeeDto;
     /**
      * Reduce only flag
      */
@@ -143,7 +143,7 @@ export type ExchangeOrderDto = {
     };
 };
 
-export type OrderPerformanceDto = {
+export type ExchangeOrderPerformanceDto = {
     /**
      * Profit percentage (ROI)
      */
@@ -186,7 +186,7 @@ export type OrderPerformanceDto = {
     volume: number;
 };
 
-export type FetchOrdersResponseDto = {
+export type ListExchangeOrdersResponseDto = {
     /**
      * Orders retrieved from the exchange
      */
@@ -194,15 +194,15 @@ export type FetchOrdersResponseDto = {
     /**
      * Performance metrics (when computePerformance=true)
      */
-    performance?: OrderPerformanceDto;
+    performance?: ExchangeOrderPerformanceDto;
 };
 
-export type LocalQuantityDto = {
+export type InternalQuantityDto = {
     type: 'fixed' | 'percent';
     value: string;
 };
 
-export type LocalOrderDto = {
+export type InternalOrderDto = {
     /**
      * Internal order UID
      */
@@ -211,7 +211,7 @@ export type LocalOrderDto = {
     side: 'buy' | 'sell';
     type: 'market' | 'limit';
     price: string;
-    quantity: LocalQuantityDto;
+    quantity: InternalQuantityDto;
     status: 'new' | 'pending' | 'completed' | 'cancelled' | 'failed';
     /**
      * Exchange order ID (once submitted)
@@ -243,7 +243,7 @@ export type LocalOrderDto = {
     errorMessage?: string;
 };
 
-export type LocalPositionDto = {
+export type InternalPositionDto = {
     pair: string;
     side: 'buy' | 'sell';
     /**
@@ -273,9 +273,9 @@ export type LocalPositionDto = {
     isOpen: boolean;
 };
 
-export type ListLocalOrdersResponseDto = {
-    orders: Array<LocalOrderDto>;
-    positions: Array<LocalPositionDto>;
+export type ListInternalOrdersResponseDto = {
+    orders: Array<InternalOrderDto>;
+    positions: Array<InternalPositionDto>;
 };
 
 export type CreateRuleDto = {
@@ -367,23 +367,23 @@ export type AppControllerHealthResponses = {
     200: unknown;
 };
 
-export type ApiOrderControllerFetchOrdersData = {
-    body: FetchOrdersDto;
+export type ApiOrderControllerListExchangeOrdersData = {
+    body: ListExchangeOrdersDto;
     path?: never;
     query?: never;
-    url: '/api/orders';
+    url: '/api/orders/exchange/list';
 };
 
-export type ApiOrderControllerFetchOrdersResponses = {
+export type ApiOrderControllerListExchangeOrdersResponses = {
     /**
      * Orders retrieved successfully
      */
-    200: FetchOrdersResponseDto;
+    200: ListExchangeOrdersResponseDto;
 };
 
-export type ApiOrderControllerFetchOrdersResponse = ApiOrderControllerFetchOrdersResponses[keyof ApiOrderControllerFetchOrdersResponses];
+export type ApiOrderControllerListExchangeOrdersResponse = ApiOrderControllerListExchangeOrdersResponses[keyof ApiOrderControllerListExchangeOrdersResponses];
 
-export type ApiOrderControllerListLocalOrdersData = {
+export type ApiOrderControllerListInternalOrdersData = {
     body?: never;
     path?: never;
     query?: {
@@ -408,17 +408,17 @@ export type ApiOrderControllerListLocalOrdersData = {
          */
         ruleId?: string;
     };
-    url: '/api/orders/local';
+    url: '/api/orders/internal/list';
 };
 
-export type ApiOrderControllerListLocalOrdersResponses = {
+export type ApiOrderControllerListInternalOrdersResponses = {
     /**
      * Local orders and positions retrieved successfully
      */
-    200: ListLocalOrdersResponseDto;
+    200: ListInternalOrdersResponseDto;
 };
 
-export type ApiOrderControllerListLocalOrdersResponse = ApiOrderControllerListLocalOrdersResponses[keyof ApiOrderControllerListLocalOrdersResponses];
+export type ApiOrderControllerListInternalOrdersResponse = ApiOrderControllerListInternalOrdersResponses[keyof ApiOrderControllerListInternalOrdersResponses];
 
 export type ApiRulesControllerFindAllData = {
     body?: never;

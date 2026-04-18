@@ -10,7 +10,7 @@ export const LOCAL_ORDER_STATUSES = [
   'failed',
 ] as const;
 
-export class ListLocalOrdersDto {
+export class ListInternalOrdersDto {
   @ApiPropertyOptional({
     description: 'Filter orders placed on or after this timestamp (ms)',
     example: 1700000000000,
