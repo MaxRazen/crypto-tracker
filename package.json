@@ -6,9 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "yarn build:web && nest build",
-    "build:web": "yarn workspace web build",
-    "dev:web": "yarn workspace web dev",
+    "build": "yarn nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
