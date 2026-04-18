@@ -4,11 +4,12 @@
 
 - [x] Ticker & worker implementation
 - [x] Order manager integration
-- [ ] Enhance logging & tracing functionality
-- [ ] Rules API (CRUD endpoints, rule validation)
+- [x] Enhance logging & tracing functionality
+- [x] Rules API (CRUD endpoints, rule validation)
 - [x] Basic WebUI to manage the rules
 - [x] WebUI Authentication
-- [ ] Notification service integration
+- [x] Notification service integration
+- [ ] Rule Engine indicators support
 - [ ] Broadcast logs onto WebUI
 
 ## WebUI

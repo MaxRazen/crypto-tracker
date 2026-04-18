@@ -3,7 +3,6 @@ import { OrderService } from './order.service';
 import { ConfigModule } from '@nestjs/config';
 import orderConfig from './order.config';
 import modeConfig from '../config/mode.config';
-import { StorageModule } from '../storage/storage.module';
 import { OrderRepository } from './order.repository';
 import { PositionRepository } from './position.repository';
 import { PositionCooldownRepository } from './position-cooldown.repository';
@@ -16,7 +15,6 @@ describe('OrderService', () => {
       imports: [
         ConfigModule.forFeature(orderConfig),
         ConfigModule.forFeature(modeConfig),
-        StorageModule,
       ],
       providers: [
         OrderRepository,

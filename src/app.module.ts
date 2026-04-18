@@ -5,7 +5,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { RuleModule } from './rule/rule.module';
 import { OrderModule } from './order/order.module';
 import { ConfigModule } from '@nestjs/config';
-import { StorageModule } from './storage/storage.module';
 import { ExchangeModule } from './exchange/exchange.module';
 import { AppController } from './app.controller';
 import { ApiModule } from './api/api.module';
@@ -14,7 +13,6 @@ import { OrderEntity } from './order/entities/order.entity';
 import { RuleEntity } from './rule/entities/rule.entity';
 import { PositionEntity } from './order/entities/position.entity';
 import { PositionCooldownEntity } from './order/entities/position-cooldown.entity';
-import storageConfig from './storage/storage.config';
 import authConfig from './auth/auth.config';
 import { ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
@@ -22,6 +20,7 @@ import { DataProviderModule } from './data-provider/data-provider.module';
 import { RuleEngineModule } from './rule-engine/rule-engine.module';
 import { NotificationModule } from './notification/notification.module';
 import { EventModule } from './event/event.module';
+import storageConfig from './config/storage.config';
 
 @Module({
   imports: [
@@ -55,7 +54,6 @@ import { EventModule } from './event/event.module';
     ScheduleModule.forRoot(),
     RuleModule,
     OrderModule,
-    StorageModule,
     ExchangeModule,
     ApiModule,
     AuthModule,
