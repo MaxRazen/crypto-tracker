@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-lg font-semibold mb-4 text-header">Orders</h2>
+    <h2 class="text-lg font-semibold mb-4 text-header">Exchange Orders</h2>
 
     <!-- Filters -->
     <div class="rounded-lg border border-design bg-card p-4 mb-4">

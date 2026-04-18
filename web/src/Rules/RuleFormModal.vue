@@ -1,104 +1,103 @@
 <template>
-  <div
-    class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-    @click.self="$emit('close')"
-  >
-    <div
-      class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg border border-design bg-card shadow-xl"
-    >
-      <div class="px-5 py-4 border-b border-design font-semibold text-lg text-header">
-        {{ isEdit ? 'Edit Rule' : 'Create Rule' }}
-      </div>
-      <form id="rule-form" @submit.prevent="submit" class="p-5">
-        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-secondary">UID</label>
-            <div class="flex gap-2">
-              <input
-                v-model="form.uid"
-                class="flex-1 input-field"
-                placeholder="rule-btc-buy-low"
-                required
-                :readonly="isEdit"
-              >
-              <button
-                v-if="!isEdit"
-                type="button"
-                class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-secondary transition-colors"
-                @click="generateUid"
-              >
-                Generate
-              </button>
-            </div>
-            <span v-if="isEdit" class="text-xs text-secondary">Cannot change UID when editing</span>
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-secondary">Pair</label>
-            <select v-model="form.pair" class="w-full input-field" required>
-              <option value="">Select pair</option>
-              <option v-for="p in PAIRS" :key="p" :value="p">{{ p }}</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-secondary">Market</label>
-            <select v-model="form.market" class="w-full input-field" required>
-              <option v-for="m in MARKETS" :key="m" :value="m">{{ m }}</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-secondary">Timeframe</label>
-            <select v-model="form.timeframe" class="w-full input-field" required>
-              <option v-for="t in TIMEFRAMES" :key="t" :value="t">{{ t }}</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-secondary">Fetch Type</label>
-            <input
-              v-model="form.fetchType"
-              class="w-full input-field"
-              placeholder="ticker"
-              required
-            >
-          </div>
-          <div v-if="isEdit" class="flex flex-col gap-1">
-            <label class="flex items-center gap-2 text-sm font-medium text-secondary">
-              <Toggle v-model="form.active" />
-              Active
-            </label>
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-1 mt-4 sm:col-span-2">
-          <label class="text-sm font-medium text-secondary">Activators</label>
-          <ActivatorsEditor v-model="form.activators" />
-        </div>
-
-        <div class="flex flex-col gap-1 mt-4 sm:col-span-2">
-          <label class="text-sm font-medium text-secondary">Actions</label>
-          <ActionsEditor v-model="form.actions" />
-        </div>
-
-        <p v-if="formError" class="text-delete text-sm mt-3">{{ formError }}</p>
-      </form>
-      <div class="px-5 py-4 border-t border-design flex gap-2 justify-end">
-        <button
-          type="button"
-          class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded btn-secondary transition-colors"
-          @click="$emit('close')"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          form="rule-form"
-          class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded btn-brand disabled:opacity-50 transition-colors"
-          :disabled="saving"
-        >
-          {{ saving ? 'Saving...' : (isEdit ? 'Update' : 'Create') }}
-        </button>
-      </div>
+  <Drawer :open="true" :close-on-backdrop="false" @close="$emit('close')">
+    <div class="px-5 py-4 border-b border-design flex items-center justify-between shrink-0">
+      <span class="font-semibold text-lg text-header"
+        >{{ isEdit ? 'Edit Rule' : 'Create Rule' }}</span
+      >
+      <button
+        type="button"
+        class="inline-flex items-center justify-center w-7 h-7 rounded text-secondary hover:text-default bg-semi-dark hover:bg-semi-dark transition-colors"
+        @click="$emit('close')"
+      >
+        ✕
+      </button>
     </div>
-  </div>
+
+    <form id="rule-form" @submit.prevent="submit" class="flex-1 overflow-y-auto p-5">
+      <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-secondary">UID</label>
+          <div class="flex gap-2">
+            <input
+              v-model="form.uid"
+              class="flex-1 input-field"
+              placeholder="rule-btc-buy-low"
+              required
+              :readonly="isEdit"
+            >
+            <button
+              v-if="!isEdit"
+              type="button"
+              class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-secondary transition-colors"
+              @click="generateUid"
+            >
+              Generate
+            </button>
+          </div>
+          <span v-if="isEdit" class="text-xs text-secondary">Cannot change UID when editing</span>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-secondary">Pair</label>
+          <select v-model="form.pair" class="w-full input-field" required>
+            <option value="">Select pair</option>
+            <option v-for="p in PAIRS" :key="p" :value="p">{{ p }}</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-secondary">Market</label>
+          <select v-model="form.market" class="w-full input-field" required>
+            <option v-for="m in MARKETS" :key="m" :value="m">{{ m }}</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-secondary">Timeframe</label>
+          <select v-model="form.timeframe" class="w-full input-field" required>
+            <option v-for="t in TIMEFRAMES" :key="t" :value="t">{{ t }}</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-secondary">Fetch Type</label>
+          <input v-model="form.fetchType" class="w-full input-field" placeholder="ticker" required>
+        </div>
+        <div v-if="isEdit" class="flex flex-col gap-1">
+          <label class="flex items-center gap-2 text-sm font-medium text-secondary">
+            <Toggle v-model="form.active" />
+            Active
+          </label>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1 mt-4">
+        <label class="text-sm font-medium text-secondary">Activators</label>
+        <ActivatorsEditor v-model="form.activators" />
+      </div>
+
+      <div class="flex flex-col gap-1 mt-4">
+        <label class="text-sm font-medium text-secondary">Actions</label>
+        <ActionsEditor v-model="form.actions" />
+      </div>
+
+      <p v-if="formError" class="text-delete text-sm mt-3">{{ formError }}</p>
+    </form>
+
+    <div class="px-5 py-4 border-t border-design flex gap-2 justify-end shrink-0">
+      <button
+        type="button"
+        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded btn-secondary transition-colors"
+        @click="$emit('close')"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="rule-form"
+        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded btn-brand disabled:opacity-50 transition-colors"
+        :disabled="saving"
+      >
+        {{ saving ? 'Saving...' : (isEdit ? 'Update' : 'Create') }}
+      </button>
+    </div>
+  </Drawer>
 </template>
 
 <script setup lang="ts">
@@ -107,6 +106,7 @@ import { PAIRS, MARKETS, TIMEFRAMES } from '../constants';
 import ActivatorsEditor from './ActivatorsEditor.vue';
 import ActionsEditor from './ActionsEditor.vue';
 import Toggle from '../components/Toggle.vue';
+import Drawer from '../components/Drawer.vue';
 
 const props = defineProps<{
   rule: Record<string, unknown> | null;

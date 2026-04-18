@@ -2,6 +2,8 @@ import type {
   CreateRuleDto,
   FetchExchangeOrdersDto,
   FetchExchangeOrdersResponseDto,
+  ListInternalOrdersDto,
+  ListInternalOrdersResponseDto,
   UpdateRuleDto,
 } from './gen/types.gen';
 
@@ -69,6 +71,9 @@ export const api = {
   orders: {
     exchangeOrdersList(dto: FetchExchangeOrdersDto): Promise<FetchExchangeOrdersResponseDto> {
       return request('/api/orders/exchange/list', { method: 'POST', body: JSON.stringify(dto) });
+    },
+    internalOrdersList(dto: ListInternalOrdersDto): Promise<ListInternalOrdersResponseDto> {
+      return request('/api/orders/internal/list', { method: 'POST', body: JSON.stringify(dto) });
     },
   },
 

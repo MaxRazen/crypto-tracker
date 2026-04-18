@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Query,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -41,7 +33,7 @@ export class ApiOrderController {
     return this.apiOrdersService.listExchangeOrders(dto);
   }
 
-  @Get('internal/list')
+  @Post('internal/list')
   @ApiOperation({
     summary: 'List orders and positions from local DB',
     description:
@@ -52,7 +44,7 @@ export class ApiOrderController {
     description: 'Local orders and positions retrieved successfully',
     type: ListInternalOrdersResponseDto,
   })
-  async listInternalOrders(@Query() dto: ListInternalOrdersDto) {
+  async listInternalOrders(@Body() dto: ListInternalOrdersDto) {
     return this.apiOrdersService.listInternalOrders(dto);
   }
 }

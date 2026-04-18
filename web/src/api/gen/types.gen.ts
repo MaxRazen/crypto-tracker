@@ -197,6 +197,29 @@ export type ListExchangeOrdersResponseDto = {
     performance?: ExchangeOrderPerformanceDto;
 };
 
+export type ListInternalOrdersDto = {
+    /**
+     * Filter orders placed on or after this timestamp (ms)
+     */
+    since?: number;
+    /**
+     * Filter orders placed on or before this timestamp (ms)
+     */
+    until?: number;
+    /**
+     * Filter by trading pair (e.g., SOL-USDT)
+     */
+    pair?: string;
+    /**
+     * Filter by one or more local order statuses
+     */
+    status?: Array<'new' | 'pending' | 'completed' | 'cancelled' | 'failed'>;
+    /**
+     * Filter by rule UID — returns all orders triggered by that rule
+     */
+    ruleId?: string;
+};
+
 export type InternalQuantityDto = {
     type: 'fixed' | 'percent';
     value: string;
@@ -384,30 +407,9 @@ export type ApiOrderControllerListExchangeOrdersResponses = {
 export type ApiOrderControllerListExchangeOrdersResponse = ApiOrderControllerListExchangeOrdersResponses[keyof ApiOrderControllerListExchangeOrdersResponses];
 
 export type ApiOrderControllerListInternalOrdersData = {
-    body?: never;
+    body: ListInternalOrdersDto;
     path?: never;
-    query?: {
-        /**
-         * Filter orders placed on or after this timestamp (ms)
-         */
-        since?: number;
-        /**
-         * Filter orders placed on or before this timestamp (ms)
-         */
-        until?: number;
-        /**
-         * Filter by trading pair (e.g., SOL-USDT)
-         */
-        pair?: string;
-        /**
-         * Filter by one or more local order statuses
-         */
-        status?: Array<'new' | 'pending' | 'completed' | 'cancelled' | 'failed'>;
-        /**
-         * Filter by rule UID — returns all orders triggered by that rule
-         */
-        ruleId?: string;
-    };
+    query?: never;
     url: '/api/orders/internal/list';
 };
 

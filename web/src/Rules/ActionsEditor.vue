@@ -6,7 +6,17 @@
       class="rounded-lg border border-design bg-semi-dark p-3 mb-2"
     >
       <div class="flex justify-between items-center mb-2">
-        <span class="text-sm font-medium text-secondary">Action {{ i + 1 }}: {{ item.type }}</span>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-sm font-medium text-secondary"
+            >Action {{ i + 1 }}: {{ item.type }}</span
+          >
+          <span
+            v-if="calcCost(item) !== null"
+            class="text-xs font-mono px-2 py-0.5 rounded bg-semi-dark border border-design text-default"
+          >
+            ≈ {{ calcCost(item) }} USDT
+          </span>
+        </div>
         <button
           type="button"
           class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-secondary transition-colors"
@@ -108,6 +118,21 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<(e: 'update:modelValue', value: Array<Record<string, unknown>>) => void>();
+
+function calcCost(item: Record<string, unknown>): string | null {
+  if (!['buy', 'sell'].includes(String(item.type))) return null;
+  const ctx = item.context as Record<string, unknown> | undefined;
+  if (!ctx) return null;
+  const price = parseFloat(String(ctx.price ?? ''));
+  const qty = ctx.quantity as { type: string; value: string } | undefined;
+  if (!qty || qty.type !== 'fixed') return null;
+  const amount = parseFloat(qty.value);
+  if (!Number.isFinite(price) || !Number.isFinite(amount) || price <= 0 || amount <= 0) return null;
+  return (price * amount).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
 
 function ensureContext(item: Record<string, unknown>) {
   if (!item.context || typeof item.context !== 'object') {

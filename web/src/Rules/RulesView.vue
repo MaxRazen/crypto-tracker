@@ -2,12 +2,21 @@
   <div>
     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
       <h2 class="text-lg font-semibold m-0 text-header">Trading Rules</h2>
-      <button
-        class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded btn-brand transition-colors"
-        @click="openCreate"
-      >
-        + Add Rule
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded btn-secondary transition-colors disabled:opacity-50"
+          :disabled="loading"
+          @click="fetchRules"
+        >
+          ↺ Refresh
+        </button>
+        <button
+          class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded btn-brand transition-colors"
+          @click="openCreate"
+        >
+          + Add Rule
+        </button>
+      </div>
     </div>
 
     <div v-if="loading" class="text-secondary p-4 text-center">Loading rules...</div>
