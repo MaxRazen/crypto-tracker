@@ -10,7 +10,7 @@
 - [x] WebUI Authentication
 - [x] Notification service integration
 - [ ] Rule Engine indicators support
-- [ ] Broadcast logs onto WebUI
+- [ ] Rule representation as workflow (ref: Vue Flow)
 
 ## WebUI
 

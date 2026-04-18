@@ -20,10 +20,16 @@
                 Orders
               </button>
               <button
-                :class="['px-3 py-1.5 text-sm font-medium rounded transition-colors', currentView === 'orders' ? 'bg-active-menu text-default' : 'nav-btn-inactive']"
-                @click="currentView = 'orders'"
+                :class="['px-3 py-1.5 text-sm font-medium rounded transition-colors', currentView === 'exchange-orders' ? 'bg-active-menu text-default' : 'nav-btn-inactive']"
+                @click="currentView = 'exchange-orders'"
               >
                 Exchange Orders
+              </button>
+              <button
+                :class="['px-3 py-1.5 text-sm font-medium rounded transition-colors', currentView === 'account' ? 'bg-active-menu text-default' : 'nav-btn-inactive']"
+                @click="currentView = 'account'"
+              >
+                Account
               </button>
               <button
                 :class="['px-3 py-1.5 text-sm font-medium rounded transition-colors', currentView === 'tools' ? 'bg-active-menu text-default' : 'nav-btn-inactive']"
@@ -48,10 +54,11 @@
 
       <main class="py-6 pb-24 sm:pb-6 min-h-[calc(100vh-4rem)]">
         <div class="w-full max-w-6xl mx-auto px-4 sm:px-6">
-          <RulesView v-show="currentView === 'rules'" />
-          <OrdersView v-show="currentView === 'orders'" />
-          <InternalOrdersView v-show="currentView === 'internal-orders'" />
-          <ToolsView v-show="currentView === 'tools'" />
+          <RulesView v-if="currentView === 'rules'" />
+          <ExchangeOrdersView v-if="currentView === 'exchange-orders'" />
+          <InternalOrdersView v-if="currentView === 'internal-orders'" />
+          <ToolsView v-if="currentView === 'tools'" />
+          <AccountView v-if="currentView === 'account'" />
         </div>
       </main>
 
@@ -85,17 +92,21 @@ import { ref, computed, onMounted } from 'vue';
 import { api } from './api/api';
 import LoginView from './Login/LoginView.vue';
 import RulesView from './Rules/RulesView.vue';
-import OrdersView from './Orders/ExchangeOrdersView.vue';
+import ExchangeOrdersView from './Orders/ExchangeOrdersView.vue';
 import InternalOrdersView from './Orders/InternalOrdersView.vue';
 import ToolsView from './Tools/ToolsView.vue';
+import AccountView from './Account/AccountView.vue';
+
+type Page = 'rules' | 'exchange-orders' | 'internal-orders' | 'account' | 'tools';
 
 const authenticated = ref(false);
-const currentView = ref<'rules' | 'orders' | 'internal-orders' | 'tools'>('rules');
+const currentView = ref<Page>('rules');
 
 const mobileNav = [
   { view: 'rules' as const, shortcut: 'R', label: 'Rules' },
   { view: 'internal-orders' as const, shortcut: 'O', label: 'Orders' },
-  { view: 'orders' as const, shortcut: 'EO', label: 'Exchange' },
+  { view: 'exchange-orders' as const, shortcut: 'EO', label: 'Exchange Orders' },
+  { view: 'account' as const, shortcut: 'A', label: 'Account' },
   { view: 'tools' as const, shortcut: 'T', label: 'Tools' },
 ];
 

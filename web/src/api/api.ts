@@ -1,7 +1,9 @@
 import type {
+  BalanceDto,
+  BalanceResponseDto,
   CreateRuleDto,
-  FetchExchangeOrdersDto,
-  FetchExchangeOrdersResponseDto,
+  ListExchangeOrdersDto,
+  ListExchangeOrdersResponseDto,
   ListInternalOrdersDto,
   ListInternalOrdersResponseDto,
   UpdateRuleDto,
@@ -69,11 +71,17 @@ export const api = {
   },
 
   orders: {
-    exchangeOrdersList(dto: FetchExchangeOrdersDto): Promise<FetchExchangeOrdersResponseDto> {
+    exchangeOrdersList(dto: ListExchangeOrdersDto): Promise<ListExchangeOrdersResponseDto> {
       return request('/api/orders/exchange/list', { method: 'POST', body: JSON.stringify(dto) });
     },
     internalOrdersList(dto: ListInternalOrdersDto): Promise<ListInternalOrdersResponseDto> {
       return request('/api/orders/internal/list', { method: 'POST', body: JSON.stringify(dto) });
+    },
+  },
+
+  account: {
+    balance(dto: BalanceDto = {}): Promise<BalanceResponseDto> {
+      return request('/api/account/balance', { method: 'POST', body: JSON.stringify(dto) });
     },
   },
 

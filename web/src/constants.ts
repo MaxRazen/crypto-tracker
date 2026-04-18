@@ -1,31 +1,4 @@
-export const PAIRS = [
-  'SOL-USDT',
-  'BTC-USDT',
-  'ETH-USDT',
-  'BNB-USDT',
-  'XRP-USDT',
-  'DOGE-USDT',
-  'ADA-USDT',
-  'AVAX-USDT',
-  'LINK-USDT',
-  'DOT-USDT',
-  'MATIC-USDT',
-  'UNI-USDT',
-  'ATOM-USDT',
-  'LTC-USDT',
-  'ETC-USDT',
-  'NEAR-USDT',
-  'APT-USDT',
-  'ARB-USDT',
-  'OP-USDT',
-  'SUI-USDT',
-  'SEI-USDT',
-  'INJ-USDT',
-  'TIA-USDT',
-  'PEPE-USDT',
-  'WIF-USDT',
-  'BONK-USDT',
-];
+export const PAIRS = ['SOL-USDT', 'BTC-USDT', 'ETH-USDT', 'TON-USDT', 'BNB-USDT', 'XRP-USDT'];
 
 export const TIMEFRAMES = ['1m', '3m', '5m', '12m', '15m', '30m', '1h', '4h', '1d'];
 

@@ -13,7 +13,7 @@ export class ApiRulesService {
   async create(createRuleDto: CreateRuleDto): Promise<Rule> {
     const rule: Rule = {
       uid: createRuleDto.uid,
-      active: createRuleDto.active ?? true,
+      active: createRuleDto.active ?? false,
       pair: createRuleDto.pair,
       market: createRuleDto.market,
       timeframe: createRuleDto.timeframe,

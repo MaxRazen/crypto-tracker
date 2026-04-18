@@ -36,7 +36,12 @@
           class="rounded-lg border border-design bg-card p-3"
         >
           <div class="flex justify-between items-start mb-2">
-            <span class="font-medium text-default">{{ rule.uid }}</span>
+            <button
+              @click="copyUid(rule.uid)"
+              class="font-medium text-default border-b border-dashed border-gray-500 hover:border-brand transition-colors cursor-pointer"
+            >
+              {{ rule.uid }}
+            </button>
             <span
               :class="[
                 'inline-block px-2 py-0.5 text-xs font-medium rounded-full',
@@ -124,7 +129,12 @@
               class="border-b border-design table-row-hover"
             >
               <td class="px-4 py-3">
-                <span class="font-medium text-default">{{ rule.uid }}</span>
+                <button
+                  class="font-medium text-default border-b border-dashed border-gray-500 hover:border-brand transition-colors cursor-pointer"
+                  @click="copyUid(rule.uid)"
+                >
+                  {{ rule.uid }}
+                </button>
               </td>
               <td class="px-4 py-3 text-default">{{ rule.pair }}</td>
               <td class="px-4 py-3 text-default">{{ rule.market }}</td>
@@ -296,6 +306,10 @@ async function doDelete() {
   } catch (e) {
     error.value = e.message || 'Failed to delete';
   }
+}
+
+function copyUid(uid) {
+  navigator.clipboard.writeText(uid);
 }
 
 onMounted(fetchRules);

@@ -121,7 +121,7 @@ const isEdit = computed(() => !!props.rule?.uid);
 
 const form = ref({
   uid: '',
-  active: true,
+  active: false,
   pair: '',
   market: 'binance',
   timeframe: '1h',

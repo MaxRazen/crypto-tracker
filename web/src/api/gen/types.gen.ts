@@ -375,6 +375,29 @@ export type UpdateRuleDto = {
     deadlines?: Array<unknown>;
 };
 
+export type BalanceDto = {
+    /**
+     * Exchange ID to fetch balance from
+     */
+    exchange?: string;
+    /**
+     * Filter by a specific asset symbol (e.g. USDT, BTC)
+     */
+    symbol?: string;
+};
+
+export type AssetBalanceDto = {
+    asset: string;
+    free: number;
+    used: number;
+    total: number;
+};
+
+export type BalanceResponseDto = {
+    assets: Array<AssetBalanceDto>;
+    timestamp?: number;
+};
+
 export type LoginDto = {
     [key: string]: unknown;
 };
@@ -537,6 +560,22 @@ export type ApiRulesControllerUpdateResponses = {
      */
     200: unknown;
 };
+
+export type ApiAccountControllerBalanceData = {
+    body: BalanceDto;
+    path?: never;
+    query?: never;
+    url: '/api/account/balance';
+};
+
+export type ApiAccountControllerBalanceResponses = {
+    /**
+     * Balance retrieved successfully
+     */
+    200: BalanceResponseDto;
+};
+
+export type ApiAccountControllerBalanceResponse = ApiAccountControllerBalanceResponses[keyof ApiAccountControllerBalanceResponses];
 
 export type AuthControllerLoginData = {
     body: LoginDto;

@@ -11,6 +11,8 @@ import { OrderRepository } from '../order/order.repository';
 import { PositionRepository } from '../order/position.repository';
 import { OrderEntity } from '../order/entities/order.entity';
 import { PositionEntity } from '../order/entities/position.entity';
+import { ApiAccountService } from './account/api.account.service';
+import { ApiAccountController } from './account/api.account.controller';
 
 @Module({
   imports: [
@@ -19,10 +21,16 @@ import { PositionEntity } from '../order/entities/position.entity';
     RuleModule,
     AuthModule,
   ],
-  controllers: [ApiOrderController, ApiRulesController],
+  controllers: [
+    ApiOrderController,
+    ApiRulesController,
+    ApiAccountController,
+    //
+  ],
   providers: [
     ApiOrdersService,
     ApiRulesService,
+    ApiAccountService,
     OrderRepository,
     PositionRepository,
   ],

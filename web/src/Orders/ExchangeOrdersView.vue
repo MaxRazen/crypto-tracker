@@ -304,7 +304,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { api } from '../api/api';
-import type { FetchExchangeOrdersDto, FetchExchangeOrdersResponseDto } from '../api/gen/types.gen';
+import type { ListExchangeOrdersDto, ListExchangeOrdersResponseDto } from '../api/gen/types.gen';
 import { PAIRS } from '../constants';
 
 function toLocalDatetimeString(date: Date): string {
@@ -315,7 +315,7 @@ function toLocalDatetimeString(date: Date): string {
 const now = new Date();
 const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-const filters = reactive<FetchExchangeOrdersDto>({
+const filters = reactive<ListExchangeOrdersDto>({
   exchange: 'binance',
   pair: '',
   since: toLocalDatetimeString(sevenDaysAgo),
@@ -325,7 +325,7 @@ const filters = reactive<FetchExchangeOrdersDto>({
 
 const loading = ref(false);
 const error = ref('');
-const result = ref<FetchExchangeOrdersResponseDto | null>(null);
+const result = ref<ListExchangeOrdersResponseDto | null>(null);
 
 async function fetchOrders() {
   if (!filters.pair) return;

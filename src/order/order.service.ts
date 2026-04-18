@@ -121,20 +121,19 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
     waitForCompletion: true,
   })
   async orderProcessor() {
-    const now = Date.now();
     // Snapshot to avoid mutation issues when removing terminal orders mid-loop
     const snapshot = [...this.orders];
+
+    this.logger.debug(
+      `Process orders\n\t${snapshot.map((x) => x.pair).join('\n\t')}`,
+    );
 
     for (const order of snapshot) {
       if (order.status === 'new') {
         // Recovery path: submit orders that survived a crash before submitOrder ran
         await this.submitOrder(order);
       } else if (order.status === 'pending') {
-        const lastCheck = this.lastTrackingTime.get(order.uid) || 0;
-        if (now - lastCheck >= this.TRACKING_INTERVAL_MS) {
-          await this.trackOrder(order);
-          this.lastTrackingTime.set(order.uid, now);
-        }
+        await this.trackOrder(order);
       }
 
       if (
@@ -143,7 +142,6 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
         order.status === 'failed'
       ) {
         this.orders = this.orders.filter((o) => o.uid !== order.uid);
-        this.lastTrackingTime.delete(order.uid);
       }
     }
   }
@@ -187,7 +185,9 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
         );
       }
 
-      this.logger.debug('Submitted order', submittedOrder);
+      this.logger.debug(
+        `Submitted order uid=${order.uid} pair=${order.pair} status=${submittedOrder.status}`,
+      );
 
       order.externalUid = submittedOrder.id?.toString();
       order.status = 'pending';
@@ -219,7 +219,9 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
         symbol,
       );
 
-      this.logger.debug(`Track order UID:${order.uid}`, submittedOrder);
+      this.logger.debug(
+        `Track order uid=${order.uid} pair=${order.pair} status=${submittedOrder.status}`,
+      );
 
       const isClosed =
         submittedOrder.status === 'closed' ||
@@ -359,16 +361,12 @@ export class OrderService implements OnModuleInit, OnModuleDestroy {
       if (market) {
         const minQty = market.limits?.amount?.min || 0;
         const maxQty = market.limits?.amount?.max || Infinity;
-        const precision = market.precision?.amount || 8;
 
         if (desiredQuantity < minQty || desiredQuantity > maxQty) {
           return 0;
         }
 
-        return (
-          Math.floor(desiredQuantity * Math.pow(10, precision)) /
-          Math.pow(10, precision)
-        );
+        return parseFloat(exchange.amountToPrecision(symbol, desiredQuantity));
       }
     } catch (error) {
       this.logger.warn(
