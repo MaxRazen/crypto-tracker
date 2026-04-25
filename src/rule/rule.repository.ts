@@ -52,6 +52,7 @@ export class RuleRepository {
       fetchType: rule.fetchType,
       activators: rule.activators,
       actions: rule.actions,
+      activatedAt: rule.activatedAt,
       deadlines: JSON.stringify(rule.deadlines || []),
     };
   }
@@ -65,6 +66,7 @@ export class RuleRepository {
       fetchType: entity.fetchType,
       activators: entity.activators,
       actions: entity.actions,
+      activatedAt: entity.activatedAt,
       deadlines:
         typeof entity.deadlines === 'string'
           ? JSON.parse(entity.deadlines)

@@ -21,6 +21,7 @@ function buildRule(overrides: Partial<Rule> = {}): Rule {
     fetchType: 'ws',
     activators: [],
     actions: [],
+    activatedAt: null,
     deadlines: [],
     ...overrides,
   };

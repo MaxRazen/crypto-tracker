@@ -63,6 +63,7 @@ export type Rule = {
   active: boolean;
   pair: string;
   market: string;
+  activatedAt: Date;
   fetchType: string; // not currently used
   activators: RuleActivator[];
   actions: RuleAction[];

@@ -1,10 +1,10 @@
 import {
   IsOptional,
   IsString,
-  IsDateString,
   IsBoolean,
   IsArray,
   IsIn,
+  IsInt,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -18,24 +18,22 @@ export const CCXT_ORDER_STATUSES = [
 
 export class ListExchangeOrdersDto {
   @ApiPropertyOptional({
-    description: 'Start date for fetching orders (ISO date string)',
-    example: '2024-01-01T00:00:00Z',
-    type: String,
-    format: 'date-time',
+    description: 'Start date for fetching orders',
+    type: Number,
+    format: 'timestamp',
   })
   @IsOptional()
-  @IsDateString()
-  since?: string;
+  @IsInt()
+  since?: number;
 
   @ApiPropertyOptional({
-    description: 'End date for fetching orders (ISO date string)',
-    example: '2024-01-31T23:59:59Z',
-    type: String,
-    format: 'date-time',
+    description: 'End date for fetching orders',
+    type: Number,
+    format: 'timestamp',
   })
   @IsOptional()
-  @IsDateString()
-  until?: string;
+  @IsInt()
+  until?: number;
 
   @ApiPropertyOptional({
     description: 'Trading pair to filter orders (e.g., BTC-USDT)',

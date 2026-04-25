@@ -20,6 +20,7 @@ import {
 import { ApiRulesService } from './api.rules.service';
 import { CreateRuleDto } from './dto/create-rule.dto';
 import { UpdateRuleDto } from './dto/update-rule.dto';
+import { RuleDto } from './dto/rule.dto';
 import { Rule } from '../../rule/rule.types';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
@@ -36,6 +37,7 @@ export class ApiRulesController {
   @ApiResponse({
     status: 201,
     description: 'Rule created successfully',
+    type: RuleDto,
   })
   async create(@Body() createRuleDto: CreateRuleDto): Promise<Rule> {
     return await this.apiRulesService.create(createRuleDto);
@@ -46,9 +48,9 @@ export class ApiRulesController {
   @ApiResponse({
     status: 200,
     description: 'List of all rules',
-    type: [Object],
+    type: [RuleDto],
   })
-  async findAll(): Promise<Rule[]> {
+  async findAll(): Promise<RuleDto[]> {
     return await this.apiRulesService.findAll();
   }
 
@@ -57,7 +59,7 @@ export class ApiRulesController {
   @ApiResponse({
     status: 200,
     description: 'List of active rules',
-    type: [Object],
+    type: [RuleDto],
   })
   async findActive(): Promise<Rule[]> {
     return await this.apiRulesService.findActive();
@@ -70,14 +72,8 @@ export class ApiRulesController {
     description: 'Rule unique identifier',
     example: 'rule-btc-buy-low',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Rule found',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Rule not found',
-  })
+  @ApiResponse({ status: 200, description: 'Rule found', type: RuleDto })
+  @ApiResponse({ status: 404, description: 'Rule not found' })
   async findOne(@Param('uid') uid: string): Promise<Rule> {
     return await this.apiRulesService.findOne(uid);
   }
@@ -92,6 +88,7 @@ export class ApiRulesController {
   @ApiResponse({
     status: 200,
     description: 'Rule updated successfully',
+    type: RuleDto,
   })
   async update(
     @Param('uid') uid: string,

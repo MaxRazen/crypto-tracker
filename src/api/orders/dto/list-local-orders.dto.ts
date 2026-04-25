@@ -1,5 +1,5 @@
 import { IsOptional, IsString, IsArray, IsIn, IsNumber } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export const LOCAL_ORDER_STATUSES = [
@@ -11,20 +11,19 @@ export const LOCAL_ORDER_STATUSES = [
 ] as const;
 
 export class ListInternalOrdersDto {
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Filter orders placed on or after this timestamp (ms)',
+    type: Number,
     example: 1700000000000,
   })
-  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   since?: number;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Filter orders placed on or before this timestamp (ms)',
-    example: 1800000000000,
+    type: Number,
   })
-  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   until?: number;

@@ -248,8 +248,8 @@ async function fetchOrders() {
   error.value = '';
   try {
     const dto: ListInternalOrdersDto = {
-      since: new Date(filters.since).getTime(),
-      until: new Date(`${filters.until}T23:59:59`).getTime(),
+      since: Math.trunc(new Date(filters.since).getTime() / 1000),
+      until: Math.trunc(new Date(`${filters.until}T23:59:59`).getTime()),
       pair: filters.pair || undefined,
       status: filters.status ? [filters.status] : undefined,
     };

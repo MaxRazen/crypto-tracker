@@ -3,6 +3,7 @@ import { RuleService } from '../../rule/rule.service';
 import { Rule } from '../../rule/rule.types';
 import { CreateRuleDto } from './dto/create-rule.dto';
 import { UpdateRuleDto } from './dto/update-rule.dto';
+import { RuleDto } from './dto/rule.dto';
 
 @Injectable()
 export class ApiRulesService {
@@ -19,6 +20,7 @@ export class ApiRulesService {
       fetchType: createRuleDto.fetchType ?? 'ws',
       activators: createRuleDto.activators,
       actions: createRuleDto.actions,
+      activatedAt: null,
       deadlines: createRuleDto.deadlines || [],
     };
 
@@ -27,8 +29,15 @@ export class ApiRulesService {
     return rule;
   }
 
-  async findAll(): Promise<Rule[]> {
-    return await this.ruleService.getAllRules();
+  async findAll(): Promise<RuleDto[]> {
+    const rules = await this.ruleService.getAllRules();
+
+    return rules.map((x) => {
+      return {
+        ...x,
+        status: x.activatedAt ? 'activated' : x.active ? 'active' : 'inactive',
+      } as RuleDto;
+    });
   }
 
   async findOne(uid: string): Promise<Rule> {

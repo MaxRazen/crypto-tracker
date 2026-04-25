@@ -258,7 +258,10 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
 
         // Persist deactivation
         this.ruleService
-          .updateRule(rule.uid, { active: false })
+          .updateRule(rule.uid, {
+            active: false,
+            activatedAt: new Date(),
+          })
           .catch((err) =>
             this.logger.error(
               `Failed to deactivate rule ${rule.uid}: ${err.message}`,
