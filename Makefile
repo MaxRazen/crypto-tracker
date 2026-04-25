@@ -4,6 +4,12 @@ build:
 run:
 	yarn run start:dev
 
+runweb:
+	yarn --cwd web run dev
+
+gen\:api:
+	yarn --cwd web run gen:api
+
 .PHONY: test
 test:
 	yarn run test

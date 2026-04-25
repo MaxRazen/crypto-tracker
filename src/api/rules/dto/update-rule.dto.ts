@@ -1,6 +1,8 @@
 import { IsString, IsBoolean, IsArray, IsOptional } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { RuleActivator, RuleAction } from '../../../rule/rule.types';
+import { RuleActivatorDto } from './rule-activator.dto';
+import { RuleActionDto } from './rule-action.dto';
 
 export class UpdateRuleDto {
   @ApiPropertyOptional({
@@ -28,14 +30,6 @@ export class UpdateRuleDto {
   market?: string;
 
   @ApiPropertyOptional({
-    description: 'Timeframe for price data',
-    example: '1h',
-  })
-  @IsOptional()
-  @IsString()
-  timeframe?: string;
-
-  @ApiPropertyOptional({
     description: 'Type of data fetch',
     example: 'ticker',
   })
@@ -45,15 +39,8 @@ export class UpdateRuleDto {
 
   @ApiPropertyOptional({
     description: 'Array of rule activators (conditions)',
-    example: [
-      {
-        type: 'price',
-        side: 'lte',
-        value: '50000',
-        timeframe: '1m',
-      },
-    ],
-    type: 'array',
+    type: [RuleActivatorDto],
+    example: [{ type: 'price', side: 'lte', value: '50000', timeframe: '1m' }],
   })
   @IsOptional()
   @IsArray()
@@ -61,20 +48,17 @@ export class UpdateRuleDto {
 
   @ApiPropertyOptional({
     description: 'Array of actions to execute when rule is activated',
+    type: [RuleActionDto],
     example: [
       {
         type: 'buy',
         context: {
           type: 'market',
           price: '50000',
-          quantity: {
-            type: 'percent',
-            value: '50',
-          },
+          quantity: { type: 'percent', value: '50' },
         },
       },
     ],
-    type: 'array',
   })
   @IsOptional()
   @IsArray()

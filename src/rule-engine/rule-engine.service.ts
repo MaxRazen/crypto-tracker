@@ -166,7 +166,7 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
       const sub = map.get(pair)!;
 
       for (const activator of rule.activators) {
-        const timeframe = activator.timeframe || rule.timeframe;
+        const timeframe = activator.timeframe;
         sub.timeframes.add(timeframe);
 
         const needed = Math.max(
@@ -277,7 +277,7 @@ export class RuleEngineService implements OnModuleInit, OnModuleDestroy {
     currentPrice: number,
   ): ActivatorEvaluation[] {
     return rule.activators.map((activator) => {
-      const timeframe = activator.timeframe || rule.timeframe;
+      const timeframe = activator.timeframe;
       return this.evaluateActivator(
         activator,
         wsSymbol,

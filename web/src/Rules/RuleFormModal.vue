@@ -49,16 +49,13 @@
             <option v-for="m in MARKETS" :key="m" :value="m">{{ m }}</option>
           </select>
         </div>
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-secondary">Timeframe</label>
-          <select v-model="form.timeframe" class="w-full input-field" required>
-            <option v-for="t in TIMEFRAMES" :key="t" :value="t">{{ t }}</option>
-          </select>
-        </div>
+        <div class="hidden lg:flex flex-col gap-1"></div>
+        <!-- Currently not supported
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-secondary">Fetch Type</label>
           <input v-model="form.fetchType" class="w-full input-field" placeholder="ticker" required>
         </div>
+        -->
         <div v-if="isEdit" class="flex flex-col gap-1">
           <label class="flex items-center gap-2 text-sm font-medium text-secondary">
             <Toggle v-model="form.active" />
@@ -102,7 +99,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { PAIRS, MARKETS, TIMEFRAMES } from '../constants';
+import { PAIRS, MARKETS } from '../constants';
 import ActivatorsEditor from './ActivatorsEditor.vue';
 import ActionsEditor from './ActionsEditor.vue';
 import Toggle from '../components/Toggle.vue';
@@ -124,7 +121,6 @@ const form = ref({
   active: false,
   pair: '',
   market: 'binance',
-  timeframe: '1h',
   fetchType: 'ticker',
   activators: [] as Record<string, unknown>[],
   actions: [] as Record<string, unknown>[],
@@ -138,7 +134,7 @@ function normalizeActivator(a: Record<string, unknown>) {
     type: a.type || 'price',
     side: a.side || 'lte',
     value: a.value ?? '',
-    timeframe: a.timeframe || '1h',
+    timeframe: a.timeframe || '5m',
   };
 }
 
@@ -173,7 +169,6 @@ watch(
         active: (r.active as boolean) ?? true,
         pair: r.pair as string,
         market: r.market as string,
-        timeframe: r.timeframe as string,
         fetchType: r.fetchType as string,
         activators: (Array.isArray(r.activators) ? r.activators : []).map((a) =>
           normalizeActivator(a as Record<string, unknown>),
@@ -186,11 +181,10 @@ watch(
       form.value = {
         uid: '',
         active: true,
-        pair: 'BTC-USDT',
+        pair: 'SOL-USDT',
         market: 'binance',
-        timeframe: '1h',
         fetchType: 'ticker',
-        activators: [{ type: 'price', side: 'lte', value: '', timeframe: '1h' }],
+        activators: [{ type: 'price', side: 'lte', value: '', timeframe: '5m' }],
         actions: [{ type: 'notification', context: { channel: 'telegram' } }],
       };
     }
@@ -205,7 +199,7 @@ function generateUid() {
   form.value.uid = `rule-${slug}-${Date.now().toString(36)}`;
 }
 
-async function submit() {
+function submit() {
   formError.value = '';
   if (form.value.activators.length === 0) {
     formError.value = 'At least one activator is required';
@@ -225,7 +219,7 @@ async function submit() {
 
   saving.value = true;
   try {
-    await emit('save', { ...form.value });
+    emit('save', { ...form.value });
   } catch (e: unknown) {
     formError.value = (e as Error)?.message || 'Save failed';
   } finally {

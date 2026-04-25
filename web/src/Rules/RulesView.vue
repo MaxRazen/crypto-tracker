@@ -51,10 +51,7 @@
               {{ rule.active ? 'Active' : 'Inactive' }}
             </span>
           </div>
-          <div class="text-sm text-secondary mb-3">
-            {{ rule.pair }}
-            · {{ rule.market }} · {{ rule.timeframe }}
-          </div>
+          <div class="text-sm text-secondary mb-3">{{ rule.pair }} · {{ rule.market }}</div>
           <div class="flex gap-2 flex-wrap">
             <button
               class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-secondary transition-colors"
@@ -113,11 +110,6 @@
               <th
                 class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
               >
-                Timeframe
-              </th>
-              <th
-                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
-              >
                 Actions
               </th>
             </tr>
@@ -148,7 +140,6 @@
                   {{ rule.active ? 'Active' : 'Inactive' }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-default">{{ rule.timeframe }}</td>
               <td class="px-4 py-3 whitespace-nowrap">
                 <div class="flex gap-2">
                   <button

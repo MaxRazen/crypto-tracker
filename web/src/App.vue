@@ -75,13 +75,6 @@
           <span class="text-base font-bold font-mono leading-none">{{ item.shortcut }}</span>
           <span>{{ item.label }}</span>
         </button>
-        <button
-          class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-xs font-medium text-secondary transition-colors"
-          @click="handleLogout"
-        >
-          <span class="text-base font-bold font-mono leading-none">L</span>
-          <span>Logout</span>
-        </button>
       </nav>
     </template>
   </div>
@@ -105,7 +98,7 @@ const currentView = ref<Page>('rules');
 const mobileNav = [
   { view: 'rules' as const, shortcut: 'R', label: 'Rules' },
   { view: 'internal-orders' as const, shortcut: 'O', label: 'Orders' },
-  { view: 'exchange-orders' as const, shortcut: 'EO', label: 'Exchange Orders' },
+  { view: 'exchange-orders' as const, shortcut: 'EO', label: 'ExOrders' },
   { view: 'account' as const, shortcut: 'A', label: 'Account' },
   { view: 'tools' as const, shortcut: 'T', label: 'Tools' },
 ];

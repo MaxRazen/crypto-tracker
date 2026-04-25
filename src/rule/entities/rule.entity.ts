@@ -25,9 +25,6 @@ export class RuleEntity {
   market: string;
 
   @Column({ type: 'text' })
-  timeframe: string;
-
-  @Column({ type: 'text' })
   fetchType: string;
 
   @Column('json')

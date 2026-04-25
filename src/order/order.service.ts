@@ -22,8 +22,6 @@ import { OrderActionEvent } from '../event/event.types';
 export class OrderService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(OrderService.name);
   private readonly DEFAULT_EXCHANGE_ID = 'binance';
-  private readonly TRACKING_INTERVAL_MS = 60_000;
-  private lastTrackingTime: Map<string, number> = new Map();
   private eventSub: Subscription | null = null;
 
   private orders: Order[] = [];

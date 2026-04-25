@@ -580,7 +580,6 @@ describe('OrderService', () => {
     it('should call trackOrder for pending orders when tracking interval has elapsed', async () => {
       const order = buildOrder({ status: 'pending', externalUid: 'ext-1' });
       (service as any).orders = [order];
-      (service as any).lastTrackingTime.set(order.uid, 0); // force elapsed
 
       mockExchangeService.getOrder.mockResolvedValue(
         buildCcxtOrder({ status: 'open', filled: 0 }),
@@ -591,20 +590,9 @@ describe('OrderService', () => {
       expect(mockExchangeService.getOrder).toHaveBeenCalled();
     });
 
-    it('should skip trackOrder for pending orders within the tracking interval', async () => {
-      const order = buildOrder({ status: 'pending', externalUid: 'ext-1' });
-      (service as any).orders = [order];
-      (service as any).lastTrackingTime.set(order.uid, Date.now()); // just checked
-
-      await service.orderProcessor();
-
-      expect(mockExchangeService.getOrder).not.toHaveBeenCalled();
-    });
-
     it('should remove completed orders from memory after the cron cycle', async () => {
       const order = buildOrder({ status: 'pending', externalUid: 'ext-1' });
       (service as any).orders = [order];
-      (service as any).lastTrackingTime.set(order.uid, 0);
 
       mockExchangeService.getOrder.mockResolvedValue(
         buildCcxtOrder({ status: 'closed', filled: 10 }),

@@ -27,7 +27,7 @@ export const ORDER_TYPES = [
 ];
 
 export const QUANTITY_TYPES = [
-  'percent',
   'fixed',
+  'percent',
   //
 ];

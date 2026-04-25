@@ -1,4 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { OrderPerformanceDto } from './order-performance.dto';
+
+export { OrderPerformanceDto };
 
 /**
  * Fee structure from CCXT exchange order
@@ -105,47 +108,6 @@ export class ExchangeOrderDto {
 }
 
 /**
- * Order performance metrics (when computePerformance=true)
- */
-export class ExchangeOrderPerformanceDto {
-  @ApiProperty({ description: 'Profit percentage (ROI)', example: 5.25 })
-  profitPercent: number;
-
-  @ApiProperty({ description: 'Realized profit', example: 125.5 })
-  profit: number;
-
-  @ApiProperty({
-    description: 'Anticipated profit (including open orders)',
-    example: 150.0,
-  })
-  anticipatedProfit: number;
-
-  @ApiProperty({ description: 'Total fees paid', example: 0.5 })
-  fees: number;
-
-  @ApiProperty({
-    description: 'Total orders (excluding cancelled)',
-    example: 10,
-  })
-  totalOrders: number;
-
-  @ApiProperty({ description: 'Cancelled orders count', example: 2 })
-  cancelledOrders: number;
-
-  @ApiProperty({ description: 'Active/open orders count', example: 1 })
-  activeOrders: number;
-
-  @ApiProperty({ description: 'Average buy price', example: 49500 })
-  avgBuyPrice: number;
-
-  @ApiProperty({ description: 'Average sell price', example: 52000 })
-  avgSellPrice: number;
-
-  @ApiProperty({ description: 'Total volume (buy + sell)', example: 1.5 })
-  volume: number;
-}
-
-/**
  * Response for fetch orders endpoint
  */
 export class ListExchangeOrdersResponseDto {
@@ -157,7 +119,7 @@ export class ListExchangeOrdersResponseDto {
 
   @ApiPropertyOptional({
     description: 'Performance metrics (when computePerformance=true)',
-    type: ExchangeOrderPerformanceDto,
+    type: OrderPerformanceDto,
   })
-  performance?: ExchangeOrderPerformanceDto;
+  performance?: OrderPerformanceDto;
 }

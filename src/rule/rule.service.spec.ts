@@ -18,7 +18,6 @@ function buildRule(overrides: Partial<Rule> = {}): Rule {
     active: true,
     pair: 'SOL-USDT',
     market: 'binance',
-    timeframe: '1m',
     fetchType: 'ws',
     activators: [],
     actions: [],

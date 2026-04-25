@@ -54,7 +54,7 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
     const body = rule.activators
       .map((a) => {
         const side = a.side === 'gte' ? '≥' : '≤';
-        const tf = a.timeframe || rule.timeframe;
+        const tf = a.timeframe;
         return this.escape(`${a.type} ${side} ${a.value} [${tf}]`);
       })
       .join('\n');

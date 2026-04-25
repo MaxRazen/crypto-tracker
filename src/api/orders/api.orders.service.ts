@@ -10,19 +10,9 @@ import {
   InternalOrderDto,
   InternalPositionDto,
 } from './dto/list-local-orders.response.dto';
+import { OrderPerformanceDto } from './dto/order-performance.dto';
 
-export interface OrderPerformance {
-  profitPercent: number;
-  profit: number;
-  anticipatedProfit: number;
-  fees: number;
-  totalOrders: number;
-  cancelledOrders: number;
-  activeOrders: number;
-  avgBuyPrice: number;
-  avgSellPrice: number;
-  volume: number;
-}
+export { OrderPerformanceDto };
 
 @Injectable()
 export class ApiOrdersService {
@@ -61,7 +51,7 @@ export class ApiOrdersService {
     ...dto
   }: ListExchangeOrdersDto): Promise<{
     orders: ExchangeOrder[];
-    performance?: OrderPerformance;
+    performance?: OrderPerformanceDto;
   }> {
     const exchangeId = exchange || 'binance';
 
@@ -110,7 +100,7 @@ export class ApiOrdersService {
     };
   }
 
-  private computePerformance(orders: ExchangeOrder[]): OrderPerformance {
+  private computePerformance(orders: ExchangeOrder[]): OrderPerformanceDto {
     let totalBuyVolume = 0;
     let totalBuyCost = 0;
     let totalSellVolume = 0;
