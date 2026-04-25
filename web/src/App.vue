@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="flex flex-col min-h-screen">
     <template v-if="!authenticated"> <LoginView @login="handleLogin" /> </template>
     <template v-else>
       <header class="py-4 border-b border-design bg-semi-dark">
@@ -52,7 +52,7 @@
         </div>
       </header>
 
-      <main class="py-6 pb-24 sm:pb-6 min-h-[calc(100vh-4rem)]">
+      <main class="py-6 pb-24 sm:pb-6 flex-1">
         <div class="w-full max-w-6xl mx-auto px-4 sm:px-6">
           <RulesView v-if="currentView === 'rules'" />
           <ExchangeOrdersView v-if="currentView === 'exchange-orders'" />

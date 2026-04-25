@@ -27,152 +27,96 @@
     >
       No rules yet. Create one to get started.
     </div>
-    <div v-else>
-      <!-- Mobile: card layout -->
-      <div class="block md:hidden space-y-3">
-        <div
-          v-for="rule in rules"
-          :key="rule.uid"
-          class="rounded-lg border border-design bg-card p-3"
-        >
-          <div class="flex justify-between items-start mb-2">
-            <button
-              @click="copyUid(rule.uid)"
-              class="font-medium text-default border-b border-dashed border-gray-500 hover:border-brand transition-colors cursor-pointer"
-            >
-              {{ rule.uid }}
-            </button>
-            <span
-              :class="[
-                'inline-block px-2 py-0.5 text-xs font-medium rounded-full',
-                rule.active ? 'bg-[#2c84db]/20 text-[#2c84db]' : 'bg-semi-dark text-secondary',
-              ]"
-            >
-              {{ rule.active ? 'Active' : 'Inactive' }}
-            </span>
-          </div>
-          <div class="text-sm text-secondary mb-3">{{ rule.pair }} · {{ rule.market }}</div>
-          <div class="flex gap-2 flex-wrap">
-            <button
-              class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-secondary transition-colors"
-              @click="openEdit(rule)"
-            >
-              Edit
-            </button>
-            <button
-              v-if="rule.active"
-              class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-secondary transition-colors"
-              @click="deactivate(rule)"
-            >
-              Deactivate
-            </button>
-            <button
-              v-else
-              class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-brand transition-colors"
-              @click="activate(rule)"
-            >
-              Activate
-            </button>
-            <button
-              class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-delete transition-colors"
-              @click="confirmDelete(rule)"
-            >
-              Delete
-            </button>
+
+    <div v-else class="space-y-6">
+      <div v-for="group in grouped" :key="group.key">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="px-2 py-0.5 rounded bg-semi-dark text-sm font-semibold text-header"
+            >{{ group.pair }}</span
+          >
+          <span class="px-2 py-0.5 rounded bg-semi-dark text-sm text-secondary"
+            >{{ group.market }}</span
+          >
+          <CurrentPairPrice
+            class="px-2 py-0.5 rounded bg-semi-dark text-sm text-secondary"
+            :pair="group.pair"
+          />
+          <div class="flex-1 border-t border-design"></div>
+          <span class="text-xs text-secondary whitespace-nowrap"
+            >{{ group.rules.length }}
+            rule{{ group.rules.length !== 1 ? 's' : '' }}</span
+          >
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div
+            v-for="rule in group.rules"
+            :key="rule.uid"
+            class="rounded-lg border border-design bg-card p-3 cursor-pointer transition-colors hover:border-[#2c84db]/60"
+            @click="openEdit(rule)"
+          >
+            <div class="flex justify-between items-start gap-2 mb-2">
+              <button
+                class="font-mono text-sm text-default border-b border-dashed border-gray-500 hover:border-brand transition-colors leading-tight truncate max-w-[70%]"
+                @click.stop="copyUid(rule.uid)"
+                :title="rule.uid"
+              >
+                {{ rule.uid }}
+              </button>
+              <span
+                :class="['inline-block px-2 py-0.5 text-xs font-medium rounded-full shrink-0', statusBadgeClass(rule.status)]"
+              >
+                {{ rule.status }}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-x-3 gap-y-1 mb-3 min-h-[2.5rem]">
+              <div>
+                <div class="text-xs font-medium text-secondary mb-1">Conditions</div>
+                <div
+                  v-for="(a, i) in rule.activators"
+                  :key="i"
+                  class="text-sm text-default leading-tight"
+                >
+                  {{ activatorStr(a) }}
+                </div>
+              </div>
+              <div>
+                <div class="text-xs font-medium text-secondary mb-1">Actions</div>
+                <div
+                  v-for="(a, i) in rule.actions"
+                  :key="i"
+                  class="text-sm text-default leading-tight"
+                >
+                  {{ a.type }}
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-2" @click.stop>
+              <button
+                v-if="rule.active"
+                class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-secondary transition-colors"
+                @click="deactivate(rule)"
+              >
+                Deactivate
+              </button>
+              <button
+                v-else
+                class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-brand transition-colors"
+                @click="activate(rule)"
+              >
+                Activate
+              </button>
+              <button
+                class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-delete transition-colors"
+                @click="confirmDelete(rule)"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <!-- Desktop: table -->
-      <div class="hidden md:block overflow-x-auto rounded-lg border border-design bg-card">
-        <table class="w-full text-sm border-collapse">
-          <thead>
-            <tr>
-              <th
-                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
-              >
-                UID
-              </th>
-              <th
-                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
-              >
-                Pair
-              </th>
-              <th
-                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
-              >
-                Market
-              </th>
-              <th
-                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
-              >
-                Status
-              </th>
-              <th
-                class="px-4 py-3 text-left font-semibold text-header bg-semi-dark whitespace-nowrap border-b border-design"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="rule in rules"
-              :key="rule.uid"
-              class="border-b border-design table-row-hover"
-            >
-              <td class="px-4 py-3">
-                <button
-                  class="font-medium text-default border-b border-dashed border-gray-500 hover:border-brand transition-colors cursor-pointer"
-                  @click="copyUid(rule.uid)"
-                >
-                  {{ rule.uid }}
-                </button>
-              </td>
-              <td class="px-4 py-3 text-default">{{ rule.pair }}</td>
-              <td class="px-4 py-3 text-default">{{ rule.market }}</td>
-              <td class="px-4 py-3">
-                <span
-                  :class="[
-                    'inline-block px-2 py-0.5 text-xs font-medium rounded-full',
-                    rule.active ? 'bg-[#2c84db]/20 text-[#2c84db]' : 'bg-semi-dark text-secondary',
-                  ]"
-                >
-                  {{ rule.active ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
-              <td class="px-4 py-3 whitespace-nowrap">
-                <div class="flex gap-2">
-                  <button
-                    class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-secondary transition-colors"
-                    @click="openEdit(rule)"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    v-if="rule.active"
-                    class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-secondary transition-colors"
-                    @click="deactivate(rule)"
-                  >
-                    Deactivate
-                  </button>
-                  <button
-                    v-else
-                    class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-brand transition-colors"
-                    @click="activate(rule)"
-                  >
-                    Activate
-                  </button>
-                  <button
-                    class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded btn-delete transition-colors"
-                    @click="confirmDelete(rule)"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
 
@@ -213,9 +157,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { api } from '../api/api';
+import { useWsStream } from '../composables/useWsStream';
 import RuleFormModal from './RuleFormModal.vue';
+import CurrentPairPrice from './CurrentPairPrice.vue';
+
+const { connect, disconnect } = useWsStream();
 
 const rules = ref([]);
 const loading = ref(true);
@@ -223,6 +171,37 @@ const error = ref('');
 const showModal = ref(false);
 const editingRule = ref(null);
 const deleteTarget = ref(null);
+
+const STATUS_ORDER = { active: 0, activated: 1 };
+
+const grouped = computed(() => {
+  const map = new Map();
+  for (const rule of rules.value) {
+    const key = `${rule.pair}::${rule.market}`;
+    if (!map.has(key)) map.set(key, { key, pair: rule.pair, market: rule.market, rules: [] });
+    map.get(key).rules.push(rule);
+  }
+  for (const group of map.values()) {
+    group.rules.sort((a, b) => {
+      const sa = STATUS_ORDER[a.status] ?? 2;
+      const sb = STATUS_ORDER[b.status] ?? 2;
+      return sa - sb;
+    });
+  }
+  return [...map.values()];
+});
+
+function statusBadgeClass(status) {
+  if (status === 'active') return 'bg-green-500/20 text-green-400';
+  if (status === 'activated') return 'bg-[#2c84db]/20 text-[#2c84db]';
+  return 'bg-semi-dark text-secondary';
+}
+
+function activatorStr(a) {
+  const parts = [a.type, a.side, a.value];
+  if (a.timeframe) parts.push(`[${a.timeframe}]`);
+  return parts.join(' ');
+}
 
 async function fetchRules() {
   loading.value = true;
@@ -303,5 +282,10 @@ function copyUid(uid) {
   navigator.clipboard.writeText(uid);
 }
 
-onMounted(fetchRules);
+onMounted(() => {
+  connect();
+  fetchRules();
+});
+
+onUnmounted(disconnect);
 </script>

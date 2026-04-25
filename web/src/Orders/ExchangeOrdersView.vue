@@ -307,9 +307,8 @@ import { api } from '../api/api';
 import type { ListExchangeOrdersDto, ListExchangeOrdersResponseDto } from '../api/gen/types.gen';
 import { PAIRS } from '../constants';
 
-function toLocalDatetimeString(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+function toTimestamp(date: Date): number {
+  return Math.trunc(date.getTime() / 1000);
 }
 
 const now = new Date();
@@ -318,8 +317,8 @@ const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 const filters = reactive<ListExchangeOrdersDto>({
   exchange: 'binance',
   pair: '',
-  since: toLocalDatetimeString(sevenDaysAgo),
-  until: toLocalDatetimeString(now),
+  since: toTimestamp(sevenDaysAgo),
+  until: toTimestamp(now),
   computePerformance: true,
 });
 

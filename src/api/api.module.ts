@@ -13,6 +13,7 @@ import { OrderEntity } from '../order/entities/order.entity';
 import { PositionEntity } from '../order/entities/position.entity';
 import { ApiAccountService } from './account/api.account.service';
 import { ApiAccountController } from './account/api.account.controller';
+import { ApiWsGateway } from './ws/api.ws.gateway';
 
 @Module({
   imports: [
@@ -21,18 +22,14 @@ import { ApiAccountController } from './account/api.account.controller';
     RuleModule,
     AuthModule,
   ],
-  controllers: [
-    ApiOrderController,
-    ApiRulesController,
-    ApiAccountController,
-    //
-  ],
+  controllers: [ApiOrderController, ApiRulesController, ApiAccountController],
   providers: [
     ApiOrdersService,
     ApiRulesService,
     ApiAccountService,
     OrderRepository,
     PositionRepository,
+    ApiWsGateway,
   ],
 })
 export class ApiModule {}

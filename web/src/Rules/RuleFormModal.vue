@@ -1,9 +1,16 @@
 <template>
   <Drawer :open="true" :close-on-backdrop="false" @close="$emit('close')">
     <div class="px-5 py-4 border-b border-design flex items-center justify-between shrink-0">
-      <span class="font-semibold text-lg text-header"
-        >{{ isEdit ? 'Edit Rule' : 'Create Rule' }}</span
-      >
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-lg text-header"
+          >{{ isEdit ? 'Edit Rule' : 'Create Rule' }}</span
+        >
+        <CurrentPairPrice
+          v-if="form.pair"
+          class="px-2 py-0.5 rounded bg-semi-dark text-sm text-secondary"
+          :pair="form.pair"
+        />
+      </div>
       <button
         type="button"
         class="inline-flex items-center justify-center w-7 h-7 rounded text-secondary hover:text-default bg-semi-dark hover:bg-semi-dark transition-colors"
@@ -104,6 +111,8 @@ import ActivatorsEditor from './ActivatorsEditor.vue';
 import ActionsEditor from './ActionsEditor.vue';
 import Toggle from '../components/Toggle.vue';
 import Drawer from '../components/Drawer.vue';
+import CurrentPairPrice from './CurrentPairPrice.vue';
+import type { RuleActionDto } from '../api/gen';
 
 const props = defineProps<{
   rule: Record<string, unknown> | null;
@@ -123,42 +132,43 @@ const form = ref({
   market: 'binance',
   fetchType: 'ticker',
   activators: [] as Record<string, unknown>[],
-  actions: [] as Record<string, unknown>[],
+  actions: [] as RuleActionDto[],
 });
 
 const formError = ref('');
 const saving = ref(false);
 
-function normalizeActivator(a: Record<string, unknown>) {
-  return {
-    type: a.type || 'price',
-    side: a.side || 'lte',
-    value: a.value ?? '',
-    timeframe: a.timeframe || '5m',
-  };
-}
+// TODO: remove?
+// function normalizeActivator(a: Record<string, unknown>) {
+//   return {
+//     type: a.type || 'price',
+//     side: a.side || 'lte',
+//     value: a.value ?? '',
+//     timeframe: a.timeframe || '5m',
+//   };
+// }
 
-function normalizeAction(a: Record<string, unknown>) {
-  const base = { type: a.type || 'notification', context: a.context || {} } as Record<
-    string,
-    unknown
-  >;
-  if (['activate', 'deactivate'].includes(base.type as string)) {
-    base.context = { ruleUid: (base.context as Record<string, string>)?.ruleUid || '' };
-  } else if (['buy', 'sell'].includes(base.type as string)) {
-    base.context = {
-      type: (base.context as Record<string, string>)?.type || 'market',
-      price: (base.context as Record<string, string>)?.price ?? '',
-      quantity: (base.context as Record<string, unknown>)?.quantity || {
-        type: 'percent',
-        value: '50',
-      },
-    };
-  } else {
-    base.context = { channel: (base.context as Record<string, string>)?.channel || 'telegram' };
-  }
-  return base;
-}
+// function normalizeAction(a: RuleActionDto) {
+//   const base = { type: a.type || 'notification', context: a.context || {} } as Record<
+//     string,
+//     unknown
+//   >;
+//   if (['activate', 'deactivate'].includes(base.type as string)) {
+//     base.context = { ruleUid: (base.context as Record<string, string>)?.ruleUid || '' };
+//   } else if (['buy', 'sell'].includes(base.type as string)) {
+//     base.context = {
+//       type: (base.context as Record<string, string>)?.type || 'market',
+//       price: (base.context as Record<string, string>)?.price ?? '',
+//       quantity: (base.context as Record<string, unknown>)?.quantity || {
+//         type: 'percent',
+//         value: '50',
+//       },
+//     };
+//   } else {
+//     base.context = { channel: (base.context as Record<string, string>)?.channel || 'telegram' };
+//   }
+//   return base;
+// }
 
 watch(
   () => props.rule,
@@ -170,12 +180,8 @@ watch(
         pair: r.pair as string,
         market: r.market as string,
         fetchType: r.fetchType as string,
-        activators: (Array.isArray(r.activators) ? r.activators : []).map((a) =>
-          normalizeActivator(a as Record<string, unknown>),
-        ),
-        actions: (Array.isArray(r.actions) ? r.actions : []).map((a) =>
-          normalizeAction(a as Record<string, unknown>),
-        ),
+        activators: Array.isArray(r.activators) ? r.activators : [],
+        actions: Array.isArray(r.actions) ? r.actions : [],
       };
     } else {
       form.value = {

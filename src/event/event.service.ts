@@ -5,6 +5,7 @@ import {
   OrderActionEvent,
   RuleActivationEvent,
   NotificationActionEvent,
+  MarketUpdateEvent,
 } from './event.types';
 
 /**
@@ -20,12 +21,14 @@ export class EventService implements OnModuleDestroy {
   private readonly orderAction$ = new Subject<OrderActionEvent>();
   private readonly ruleActivation$ = new Subject<RuleActivationEvent>();
   private readonly notificationAction$ = new Subject<NotificationActionEvent>();
+  private readonly marketUpdate$ = new Subject<MarketUpdateEvent>();
 
   onModuleDestroy() {
     this.ruleTriggered$.complete();
     this.orderAction$.complete();
     this.ruleActivation$.complete();
     this.notificationAction$.complete();
+    this.marketUpdate$.complete();
   }
 
   // ─── emit (called by producers) ─────────────────────────
@@ -46,6 +49,10 @@ export class EventService implements OnModuleDestroy {
     this.notificationAction$.next(event);
   }
 
+  emitMarketUpdate(event: MarketUpdateEvent): void {
+    this.marketUpdate$.next(event);
+  }
+
   // ─── observe (consumed by subscribers) ──────────────────
 
   get onRuleTriggered$(): Observable<RuleTriggeredEvent> {
@@ -62,5 +69,9 @@ export class EventService implements OnModuleDestroy {
 
   get onNotificationAction$(): Observable<NotificationActionEvent> {
     return this.notificationAction$.asObservable();
+  }
+
+  get onMarketUpdate$(): Observable<MarketUpdateEvent> {
+    return this.marketUpdate$.asObservable();
   }
 }

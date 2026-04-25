@@ -1,4 +1,7 @@
 import { Rule, RuleAction } from '../rule/rule.types';
+import { KlineEvent } from '../data-provider/data-provider.types';
+
+export type MarketUpdateEvent = KlineEvent;
 
 export interface ActivatorEvaluation {
   type: string;

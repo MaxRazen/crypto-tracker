@@ -8,6 +8,7 @@ import {
 import { BinanceWsService } from './binance-ws.service';
 import { MarketDataService } from './market-data.service';
 import modeConfig, { ModeConfig } from '../config/mode.config';
+import { EventService } from '../event/event.service';
 
 /**
  * DataProviderService manages exchange data streams.
@@ -33,6 +34,7 @@ export class DataProviderService implements OnModuleDestroy {
   constructor(
     private readonly binanceWsService: BinanceWsService,
     private readonly marketDataService: MarketDataService,
+    private readonly eventService: EventService,
     @Inject(modeConfig.KEY)
     private readonly modeConfig: ModeConfig,
   ) {}
@@ -135,6 +137,7 @@ export class DataProviderService implements OnModuleDestroy {
           event.candle,
         );
         this.marketUpdate$.next(event);
+        this.eventService.emitMarketUpdate(event);
       },
       error: (err) => {
         this.logger.error(`Kline stream error: ${err.message}`, err.stack);
