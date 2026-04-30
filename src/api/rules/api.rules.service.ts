@@ -35,7 +35,7 @@ export class ApiRulesService {
     return rules.map((x) => {
       return {
         ...x,
-        status: x.activatedAt ? 'activated' : x.active ? 'active' : 'inactive',
+        status: x.active ? 'active' : x.activatedAt ? 'activated' : 'inactive',
       } as RuleDto;
     });
   }
