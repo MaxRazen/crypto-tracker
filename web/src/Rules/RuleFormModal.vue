@@ -138,38 +138,6 @@ const form = ref({
 const formError = ref('');
 const saving = ref(false);
 
-// TODO: remove?
-// function normalizeActivator(a: Record<string, unknown>) {
-//   return {
-//     type: a.type || 'price',
-//     side: a.side || 'lte',
-//     value: a.value ?? '',
-//     timeframe: a.timeframe || '5m',
-//   };
-// }
-
-// function normalizeAction(a: RuleActionDto) {
-//   const base = { type: a.type || 'notification', context: a.context || {} } as Record<
-//     string,
-//     unknown
-//   >;
-//   if (['activate', 'deactivate'].includes(base.type as string)) {
-//     base.context = { ruleUid: (base.context as Record<string, string>)?.ruleUid || '' };
-//   } else if (['buy', 'sell'].includes(base.type as string)) {
-//     base.context = {
-//       type: (base.context as Record<string, string>)?.type || 'market',
-//       price: (base.context as Record<string, string>)?.price ?? '',
-//       quantity: (base.context as Record<string, unknown>)?.quantity || {
-//         type: 'percent',
-//         value: '50',
-//       },
-//     };
-//   } else {
-//     base.context = { channel: (base.context as Record<string, string>)?.channel || 'telegram' };
-//   }
-//   return base;
-// }
-
 watch(
   () => props.rule,
   (r) => {
@@ -201,8 +169,8 @@ watch(
 
 function generateUid() {
   const pair = form.value.pair || 'btc';
-  const slug = pair.toLowerCase().replace('-', '');
-  form.value.uid = `rule-${slug}-${Date.now().toString(36)}`;
+  const slug = pair.toUpperCase().replace(/([A-Z]+)-.+/, '$1');
+  form.value.uid = `${slug}-${Math.trunc(Math.random() * 100)}`;
 }
 
 function submit() {

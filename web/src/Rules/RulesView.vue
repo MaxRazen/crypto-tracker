@@ -19,16 +19,15 @@
       </div>
     </div>
 
-    <div v-if="loading" class="text-secondary p-4 text-center">Loading rules...</div>
-    <div v-else-if="error" class="text-delete p-4">{{ error }}</div>
+    <div if="error" class="text-delete p-4">{{ error }}</div>
     <div
-      v-else-if="rules.length === 0"
+      if="rules.length === 0"
       class="rounded-lg border border-design bg-card p-4 text-center text-secondary"
     >
       No rules yet. Create one to get started.
     </div>
 
-    <div v-else class="space-y-6">
+    <div v-if="rules.length" class="space-y-6">
       <div v-for="group in grouped" :key="group.key">
         <div class="flex items-center gap-2 mb-3">
           <span class="px-2 py-0.5 rounded bg-semi-dark text-sm font-semibold text-header"

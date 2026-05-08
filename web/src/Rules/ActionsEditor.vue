@@ -57,9 +57,10 @@
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium text-secondary">Price</label>
             <input
+              type="number"
               v-model="asBuySellCtx(item).price"
               class="w-full input-field"
-              placeholder="50000"
+              placeholder="0.1"
             >
           </div>
         </div>
@@ -73,6 +74,7 @@
           <div class="flex flex-col gap-1">
             <label class="text-sm font-medium text-secondary">Quantity Value</label>
             <input
+              type="number"
               v-model="asBuySellCtx(item).quantity.value"
               class="w-full input-field"
               placeholder="50"
@@ -156,11 +158,11 @@ function ensureContext(item: RuleActionDto): void {
     item.context = { ruleUid: (ctx?.ruleUid as string) || '' };
   } else if (['buy', 'sell'].includes(item.type)) {
     item.context = {
-      type: (ctx?.type as string) || 'market',
+      type: (ctx?.type as string) || 'limit',
       price: (ctx?.price as string) ?? '',
       quantity: (ctx?.quantity as { type: string; value: string }) || {
-        type: 'percent',
-        value: '50',
+        type: 'fixed',
+        value: '',
       },
     } satisfies BuySellContext;
   } else if (['notification', 'alert'].includes(item.type)) {
