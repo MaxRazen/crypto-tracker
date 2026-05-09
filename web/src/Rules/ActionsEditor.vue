@@ -58,8 +58,9 @@
             <label class="text-sm font-medium text-secondary">Price</label>
             <input
               type="number"
-              v-model="asBuySellCtx(item).price"
+              v-model.number="asBuySellCtx(item).price"
               class="w-full input-field"
+              step="0.000001"
               placeholder="0.1"
             >
           </div>
@@ -75,8 +76,9 @@
             <label class="text-sm font-medium text-secondary">Quantity Value</label>
             <input
               type="number"
-              v-model="asBuySellCtx(item).quantity.value"
+              v-model.number="asBuySellCtx(item).quantity.value"
               class="w-full input-field"
+              step="0.000001"
               placeholder="50"
             >
           </div>

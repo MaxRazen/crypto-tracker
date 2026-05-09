@@ -19,9 +19,9 @@
       </div>
     </div>
 
-    <div if="error" class="text-delete p-4">{{ error }}</div>
+    <div v-if="error" class="text-delete p-4">{{ error }}</div>
     <div
-      if="rules.length === 0"
+      v-if="!rules.length"
       class="rounded-lg border border-design bg-card p-4 text-center text-secondary"
     >
       No rules yet. Create one to get started.

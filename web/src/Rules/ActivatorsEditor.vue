@@ -30,7 +30,13 @@
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-secondary">Value</label>
-          <input v-model="item.value" class="w-full input-field" placeholder="0.1" type="number">
+          <input
+            v-model.number="item.value"
+            class="w-full input-field"
+            placeholder="0.1"
+            type="number"
+            step="0.000001"
+          >
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-secondary">Timeframe</label>
