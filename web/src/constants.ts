@@ -1,4 +1,4 @@
-export const PAIRS = ['SOL-USDT', 'BTC-USDT', 'ETH-USDT', 'TON-USDT', 'BNB-USDT', 'XRP-USDT'];
+export const PAIRS = ['SOL-USDT', 'BTC-USDT', 'ETH-USDT', 'GRAM-USDT', 'BNB-USDT', 'XRP-USDT'];
 
 export const TIMEFRAMES = ['1m', '3m', '5m', '12m', '15m', '30m', '1h', '4h', '1d'];
 
